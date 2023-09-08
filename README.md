@@ -1,5 +1,4 @@
-# shycatbot
-## aka the 9,000th automated image tweeter
+# shycatbot (aka the 9,000th automated image tweeter)
 
 the code for [@shycatbot](https://twitter.com/shycatbot) on twitter (**does not include cats!!!**)
 
