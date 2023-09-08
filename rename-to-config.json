@@ -1,0 +1,11 @@
+{
+    "twitterAuth": {
+        "appKey": "",
+        "appSecret": "",
+        "accessToken": "",
+        "accessSecret": ""
+    },
+    "directory": "/path/to/pictures",
+    "acceptableMimeTypes": ["image/png", "image/jpeg", "image/webp", "image/gif", "video/mp4", "video/quicktime", "video/x-m4v"],
+    "tweetIntervalMs": 3600000
+}
