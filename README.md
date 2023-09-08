@@ -2,11 +2,12 @@
 the code for [@shycatbot](https://twitter.com/shycatbot) on twitter (**does not include cats!!!**)
 
 ## run instructions
-1. make sure you have node.js installed
-2. download/clone the repository
-3. set the config values in `rename-to-config.json` and rename it to `config.json`
-4. open a terminal in the repo folder and run `npm install` to install dependencies
-5. run `node .` to start the bot
+(these instructions assume that you have node.js and SOME technical knowledge)
+
+1. download/clone the repository
+2. set the config values in `rename-to-config.json` and rename it to `config.json`
+3. open a terminal in the repo folder and run `npm install` to install dependencies
+4. run `node .` to start the bot
 
 ## notice
 this is my first open source program, very simple and dumb
