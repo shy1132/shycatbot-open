@@ -2,11 +2,11 @@
 the code for [@shycatbot](https://twitter.com/shycatbot) on twitter (**does not include cats!!!**)
 
 ## run instructions
-(these instructions assume that you have node.js and SOME technical knowledge)
+(these instructions assume that you have node.js, a folder of images/videos to use, and SOME technical knowledge)
 
 1. download/clone the repository
-2. set the config values in `rename-to-config.json` and rename it to `config.json`
-3. open a terminal in the repo folder and run `npm install` to install dependencies
+2. open a terminal in the repo folder and run `npm install` to install dependencies
+3. set the config values in `rename-to-config.json` and rename it to `config.json`
 4. run `node .` to start the bot
 
 ## notice
