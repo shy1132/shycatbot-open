@@ -1,11 +1,72 @@
 {
-    "twitterAuth": {
+    "twitter": {
+        "use": false,
         "appKey": "",
         "appSecret": "",
         "accessToken": "",
-        "accessSecret": ""
+        "accessSecret": "",
+        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/bmp", "image/gif", "video/mp4", "video/quicktime", "video/x-m4v"]
     },
+    "bluesky": {
+        "use": false,
+        "handle": "handle.bsky.social",
+        "appPassword": "",
+        "refreshIntervalMs": 1800000,
+        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/avif", "image/bmp"]
+    },
+    "mastodon": {
+        "use": false,
+        "instance": "mastodon.instance",
+        "accessToken": "",
+        "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/gif",
+            "image/webp",
+            "image/heic",
+            "image/heif",
+            "image/avif",
+            "video/mp4",
+            "video/quicktime",
+            "video/webm",
+            "video/x-ms-asf",
+            "video/ogg",
+            "audio/webm",
+            "audio/wave",
+            "audio/wav",
+            "audio/x-wav",
+            "audio/x-pn-wave",
+            "audio/vnd.wave",
+            "audio/ogg",
+            "audio/vorbis",
+            "audio/mpeg",
+            "audio/mp3",
+            "audio/flac",
+            "audio/aac",
+            "audio/m4a",
+            "audio/x-m4a",
+            "audio/mp4",
+            "audio/3gpp",
+            "audio/opus"
+        ]
+    },
+    "tumblr": {
+        "use": false,
+        "consumerKey": "",
+        "consumerSecret": "",
+        "blog": "bloghandle",
+        "refreshIntervalMs": 1800000,
+        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/gif", "video/mp4", "video/quicktime", "audio/mpeg"]
+    },
+    "cohost": {
+        "use": false,
+        "email": "bla@email.com",
+        "password": "",
+        "handle": "handle",
+        "mimeTypes": ["image/png", "image/jpeg", "image/gif","image/webp", "image/svg+xml", "audio/aac", "audio/mp4", "audio/x-m4a", "audio/flac", "audio/x-flac", "audio/mpeg", "audio/wav"]
+    },
+    "userAgent": "shycatbot (https://github.com/whakama/shycatbot-open)",
+    "syncPosts": false,
     "directory": "/path/to/pictures",
-    "acceptableMimeTypes": ["image/png", "image/jpeg", "image/webp", "image/gif", "video/mp4", "video/quicktime", "video/x-m4v"],
-    "tweetIntervalMs": 3600000
+    "postIntervalMs": 3600000
 }

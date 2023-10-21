@@ -1,46 +1,123 @@
 //shycatbot
-//aka the 9,000th automated image tweeter
+//aka the 9,001st automated image tweeter
 
 //requires
-const { TwitterApi } = require('twitter-api-v2')
-const mime = require('mime-types')
 const fs = require('fs').promises
 const path = require('path')
+const mime = require('mime-types')
 const config = require('./config.json')
 
 //code
-if(!config.twitterAuth.appKey) return console.log('missing twitter keys');
+var platforms = {
+    twitter: require('./services/twitter.js'),
+    bluesky: require('./services/bluesky.js'),
+    mastodon: require('./services/mastodon.js'),
+    tumblr: require('./services/tumblr.js'),
+    cohost: require('./services/cohost.js')
+}
+var platformKeys = Object.keys(platforms);
+var usedPlatforms = [];
+var doneCount = 0;
 
-const client = new TwitterApi({
-    appKey: config.twitterAuth.appKey,
-    appSecret: config.twitterAuth.appSecret,
-    accessToken: config.twitterAuth.accessToken,
-    accessSecret: config.twitterAuth.accessSecret,
-    timeout_ms: 60 * 1000,
-    strictSSL: true
-})
+function logSegment() {
+    return console.log('-'.repeat(64));
+}
 
-async function tweetRandomFile() {
+async function initialize() {
+    console.log('initializing')
+
+    if (config.syncPosts) {
+        console.log('sync posts is on; compatible media types are limited to only ones all used platforms support, which removes a lot of potential for posts')
+
+        var configs = platformKeys.map((platform) => config[platform])
+        var allMimeTypes = configs.filter(config => config.use).map(config => config.mimeTypes)
+        var commonMimeTypes = allMimeTypes[0].filter((value) => allMimeTypes.every((array) => array.includes(value)))
+
+        config.mimeTypes = commonMimeTypes;
+    } else {
+        console.log('sync posts is off; if the bot tries to post media that isn\'t supported on a platform, it will choose a different file for that platform')
+    }
+
+    for (let platform of platformKeys) {
+        if (config[platform].use) {
+            var response = await platforms[platform].init()
+            if (response === false) {
+                config[platform].use = false;
+            } else {
+                usedPlatforms.push(platform)
+            }
+        }
+    }
+
+    if (usedPlatforms.length < 1) return console.log('u have no platforms enabled or they all failed')
+
+    logSegment()
+
+    postRandomFile()
+    setInterval(postRandomFile, config.postIntervalMs)
+}
+
+async function postRandomFile() {
+    var file = await getRandomFile(config.syncPosts ? config.mimeTypes : null);
+    console.log(`posting ${file.fileName}`)
+
+    for (let platform of platformKeys) { //a bit hard to read but its dynamic so i wont really ever have to change this
+        let platformConfig = config[platform]
+        if (platformConfig.use) platformConfig.use = platforms[platform].isEnabled();
+        if (!platformConfig.use) continue;
+
+        if (!platformConfig.mimeTypes.includes(file.mimeType) && !config.syncPosts) {
+            console.log(`${platform}: ${file.mimeType} unsuitable, picking different file for ${platform}`)
+
+            var differentFile = await getRandomFile(platformConfig.mimeTypes);
+            console.log(`${platform}: posting ${differentFile.fileName}`)
+
+            platforms[platform].post(differentFile.fileName, differentFile.filePath, differentFile.mimeType)
+        } else {
+            console.log(`${platform}: posting ${file.fileName}`)
+            platforms[platform].post(file.fileName, file.filePath, file.mimeType)
+        }
+
+        platforms[platform].onDone(function() {
+            doneCount += 1;
+        })
+    }
+
+    await waitUntilDone();
+    logSegment()
+}
+
+async function getRandomFile(mimeTypes) {
     var files = await fs.readdir(config.directory)
+    if (mimeTypes) files = files.filter(name => mimeTypes.includes(mime.lookup(name))) //remove all mime types that arent in mimeTypes (if mimeTypes is supplied)
+    if (files.length < 1) {
+        console.log(`no files fitting these mime types could be found: ${mimeTypes.join(', ')}`)
+        return { error: true };
+    }
 
     var fileName = files[Math.floor(Math.random() * files.length)]
     var filePath = path.join(config.directory, fileName)
     var fileExtension = path.parse(fileName).ext?.toLowerCase()
-    if(!fileExtension) return console.log(`${fileName} doesn't have an extension`);
-
-    console.log(`tweeting ${fileName}`)
+    if (!fileExtension) return getRandomFile(mimeTypes);
 
     var mimeType = mime.lookup(fileExtension)
-    if(!config.acceptableMimeTypes.includes(mimeType)) return console.log(`${fileName} is not an acceptable file type`);
 
-    try {
-        var media = await client.v1.uploadMedia(filePath)
-        await client.v2.tweet(fileName, { media: { media_ids: [ media ] } })
-    } catch (err) {
-        console.log(`failed to tweet ${fileName}`)
-        console.error(err)
-    }
+    return { fileName, filePath, mimeType };
 }
 
-tweetRandomFile()
-setInterval(tweetRandomFile, config.tweetIntervalMs)
+function waitUntilDone() {
+    return new Promise(resolve => {
+        function checkIfDone() {
+            if (doneCount === usedPlatforms.length) {
+                resolve()
+                doneCount = 0;
+            } else {
+                setTimeout(checkIfDone, 10)
+            }
+        }
+
+        checkIfDone()
+    })
+}
+
+initialize()
