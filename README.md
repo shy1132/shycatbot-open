@@ -1,6 +1,5 @@
 # shycatbot (aka the 9,001st automated image tweeter)
-the code for [@shycatbot](https://twitter.com/shycatbot) on twitter (**does not include cats!!!**)
-[website](https://shy.rocks/shycatbot) (contains links to other shycatbot accounts)
+the code for [shycatbot](https://shy.rocks/shycatbot) (**does not include cats!!!**)
 
 ## run instructions
 (these instructions assume that you have a computer/server with node.js, a folder of images/videos to use, and SOME technical knowledge)
