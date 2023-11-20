@@ -78,9 +78,7 @@ async function postRandomFile() {
             platforms[platform].post(file.fileName, file.filePath, file.mimeType)
         }
 
-        platforms[platform].onDone(function() {
-            doneCount += 1;
-        })
+        platforms[platform].onDone(() => doneCount += 1)
     }
 
     await waitUntilDone();
