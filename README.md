@@ -35,3 +35,4 @@ this is probably not the most convenient thing to run for an image poster, this 
 but have at it, it runs 24/7 on my server quite reliably
 
 (and sorry for the sheer amount of platforms, i port shycatbot to things for fun)
+(AND ALSO if you decide to make a media posting bot with shycatbot's source code, link the repo somewhere!!!)
