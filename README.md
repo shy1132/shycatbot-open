@@ -22,7 +22,9 @@ for the `twitter` key, you need to sign up for the twitter api and provide the n
 
 for the `bluesky` key, you need to sign up for a bluesky account, provide the handle, and create an app password in settings and provide that to `appPassword` (`refreshIntervalMs` determines when to refresh the credentials, lower if your `postIntervalMs` is less than it)
 
-for the `mastodon` key, you need to provide the `instance` you want to post to, and an access token from where you can create an app
+for the `mastodon` key, you need to provide the `instance` you want to post to, and an access token from the setting category where you can create an app
+
+for the `firefish` key, you need to provide the `instance` you want to post to, and a token from the `API` category in settings, which needs to have the permissions `View your account information`, `Access your Drive files and folders`, `Edit or delete your Drive files and folders`, and `Compose or delete posts`. it is recommended that you choose an instance with a lot of drive storage
 
 for the `tumblr` key, you need to provide the `blog` you want to post to, and create an app and provide credentials (`refreshTokenMs` is the same content as `bluesky`'s)
 

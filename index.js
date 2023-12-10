@@ -12,6 +12,7 @@ var platforms = {
     twitter: require('./services/twitter.js'),
     bluesky: require('./services/bluesky.js'),
     mastodon: require('./services/mastodon.js'),
+    firefish: require('./services/firefish.js'),
     tumblr: require('./services/tumblr.js'),
     cohost: require('./services/cohost.js')
 }
@@ -30,7 +31,7 @@ async function initialize() {
         console.log('sync posts is on; compatible media types are limited to only ones all used platforms support, which removes a lot of potential for posts')
 
         var configs = platformKeys.map((platform) => config[platform])
-        var allMimeTypes = configs.filter(config => config.use).map(config => config.mimeTypes)
+        var allMimeTypes = configs.filter(config => config.use && config.mimeTypes).map(config => config.mimeTypes)
         var commonMimeTypes = allMimeTypes[0].filter((value) => allMimeTypes.every((array) => array.includes(value)))
 
         config.mimeTypes = commonMimeTypes;
@@ -66,7 +67,7 @@ async function postRandomFile() {
         if (platformConfig.use) platformConfig.use = platforms[platform].isEnabled();
         if (!platformConfig.use) continue;
 
-        if (!platformConfig.mimeTypes.includes(file.mimeType) && !config.syncPosts) {
+        if (platformConfig.mimeTypes && !platformConfig.mimeTypes.includes(file.mimeType) && !config.syncPosts) {
             console.log(`${platform}: ${file.mimeType} unsuitable, picking different file for ${platform}`)
 
             var differentFile = await getRandomFile(platformConfig.mimeTypes);

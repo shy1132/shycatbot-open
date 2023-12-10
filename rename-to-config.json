@@ -50,6 +50,11 @@
             "audio/opus"
         ]
     },
+    "firefish": {
+        "use": false,
+        "instance": "firefish.instance",
+        "token": ""
+    },
     "tumblr": {
         "use": false,
         "consumerKey": "",
