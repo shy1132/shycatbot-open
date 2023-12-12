@@ -16,11 +16,17 @@ if `syncPosts` is true, it will narrow it down to only file types ALL of the pla
 
 if `syncPosts` is false, it will post the same thing on every platform, but if a platform doesnt support the chosen file, it will choose a new one specifically for that platform
 
+`priorityList` is the list of platforms in whatever order you want to login + post to (since it doesnt all happen at the exact same time)
+
+`priorityList` doesn't have to include ALL of the platforms, just the ones that you're using (even then, if you don't include one, it will just push that one to the back)
+
 for any of the social media keys, set `use` to true to post to that platform
 
 for the `twitter` key, you need to sign up for the twitter api and provide the needed credentials
 
 for the `bluesky` key, you need to sign up for a bluesky account, provide the handle, and create an app password in settings and provide that to `appPassword` (`refreshIntervalMs` determines when to refresh the credentials, lower if your `postIntervalMs` is less than it)
+
+for the `threads` key, you need to sign up for a threads account, provide the email and password (important note: this is considered scraping, which violates threads' terms of service, so use this one at your own risk) (less important note: if you restart it a lot, the threads module will get ratelimited and you'll have to wait like 10 minutes before it starts working again)
 
 for the `mastodon` key, you need to provide the `instance` you want to post to, and an access token from the setting category where you can create an app
 

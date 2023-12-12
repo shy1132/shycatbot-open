@@ -11,12 +11,34 @@ const config = require('./config.json')
 var platforms = {
     twitter: require('./services/twitter.js'),
     bluesky: require('./services/bluesky.js'),
+    threads: require('./services/threads.js'),
     mastodon: require('./services/mastodon.js'),
     firefish: require('./services/firefish.js'),
     tumblr: require('./services/tumblr.js'),
     cohost: require('./services/cohost.js')
 }
+
 var platformKeys = Object.keys(platforms);
+platformKeys = platformKeys.reverse()
+platformKeys = platformKeys.sort((a, b) => {
+    let indexA = config.priorityList.indexOf(a)
+    let indexB = config.priorityList.indexOf(b)
+
+    if (indexA === -1 && indexB === -1) { //if both not in priority list, keep original order
+      return 0;
+    }
+
+    if (indexA === -1) { //if element not in priority list, move it to the end
+        return 1;
+    }
+
+    if (indexB === -1) { //same deal
+        return -1;
+    }
+
+    return indexA - indexB;
+})
+
 var usedPlatforms = [];
 var doneCount = 0;
 
@@ -41,7 +63,13 @@ async function initialize() {
 
     for (let platform of platformKeys) {
         if (config[platform].use) {
-            var response = await platforms[platform].init()
+            try {
+                var response = await platforms[platform].init()
+            } catch {
+                console.log(`uncaught error occurred while initializing ${platform}, disabling`)
+                var response = false;
+            }
+
             if (response === false) {
                 config[platform].use = false;
             } else {
