@@ -16,9 +16,23 @@
     },
     "threads": {
         "use": false,
-        "email": "bla@email.com",
+        "email": "can.be.same.as@instagram.com",
         "password": "",
         "mimeTypes": ["image/png", "image/jpeg", "video/mp4", "video/quicktime"]
+    },
+    "instagram": {
+        "use": false,
+        "email": "can.be.same.as@threads.net",
+        "password": "",
+        "mimeTypes": ["image/png", "image/jpeg", "image/heic", "image/heif", "video/mp4", "video/quicktime"]
+    },
+    "tumblr": {
+        "use": false,
+        "consumerKey": "",
+        "consumerSecret": "",
+        "blog": "bloghandle",
+        "refreshIntervalMs": 1800000,
+        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/gif", "video/mp4", "video/quicktime", "audio/mpeg"]
     },
     "mastodon": {
         "use": false,
@@ -56,19 +70,6 @@
             "audio/opus"
         ]
     },
-    "firefish": {
-        "use": false,
-        "instance": "firefish.instance",
-        "token": ""
-    },
-    "tumblr": {
-        "use": false,
-        "consumerKey": "",
-        "consumerSecret": "",
-        "blog": "bloghandle",
-        "refreshIntervalMs": 1800000,
-        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/gif", "video/mp4", "video/quicktime", "audio/mpeg"]
-    },
     "cohost": {
         "use": false,
         "email": "bla@email.com",
@@ -76,10 +77,15 @@
         "handle": "handle",
         "mimeTypes": ["image/png", "image/jpeg", "image/gif","image/webp", "image/svg+xml", "audio/aac", "audio/mp4", "audio/x-m4a", "audio/flac", "audio/x-flac", "audio/mpeg", "audio/wav"]
     },
+    "firefish": {
+        "use": false,
+        "instance": "firefish.instance",
+        "token": ""
+    },
     "userAgent": "shycatbot (https://github.com/whakama/shycatbot-open)",
     "scrapingUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/120.0",
     "syncPosts": false,
-    "priorityList": ["twitter", "bluesky", "threads", "mastodon", "firefish", "tumblr", "cohost"],
+    "priorityList": ["twitter", "tumblr", "bluesky", "mastodon", "firefish", "cohost", "threads", "instagram"],
     "directory": "/path/to/pictures",
     "postIntervalMs": 3600000
 }

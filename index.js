@@ -12,10 +12,11 @@ var platforms = {
     twitter: require('./services/twitter.js'),
     bluesky: require('./services/bluesky.js'),
     threads: require('./services/threads.js'),
-    mastodon: require('./services/mastodon.js'),
-    firefish: require('./services/firefish.js'),
+    instagram: require('./services/instagram.js'),
     tumblr: require('./services/tumblr.js'),
-    cohost: require('./services/cohost.js')
+    mastodon: require('./services/mastodon.js'),
+    cohost: require('./services/cohost.js'),
+    firefish: require('./services/firefish.js')
 }
 
 var platformKeys = Object.keys(platforms);

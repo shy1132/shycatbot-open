@@ -1,49 +1,65 @@
-//psssst this one is risky and probably breaks threads tos
-//as soon as a public api comes out, if its good, ill rewrite this to use that instead
+//psssst this one is risky and probably breaks instagram tos
+//a public api LIKELY wont come out for instagram, so this is forever risky
 
 //requires
 const fs = require('fs').promises
 const config = require('../config.json')
 
 //code
-if (!config.threads.use) return;
-if (config.threads.use && !config.threads.password) return console.log('missing threads password');
-if (config.threads.use && !config.threads.email) return console.log('missing threads email');
+if (!config.instagram.use) return;
+if (config.instagram.use && !config.instagram.password) return console.log('missing instagram password');
+if (config.instagram.use && !config.instagram.email) return console.log('missing instagram email');
 
 var done = function() {};
 
 var data = {
-    appId: '238260118697367',
+    appId: '936619743392459',
     csrfToken: '',
+    rolloutHash: '',
     cookie: ''
 }
 
 async function init() {
-    var sharedData = await (await fetch('https://www.instagram.com/data/shared_data/', {
+    var instagramLogin = await (await fetch('https://www.instagram.com/', {
         headers: {
             'User-Agent': config.scrapingUserAgent,
-            'Accept': '\/*/',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*\/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Langauge': 'en-US,en;q=0.5',
-            'Alt-Used': 'www.threads.net',
+            'Alt-Used': 'www.instagram.com',
             'Cache-Control': 'no-cache',
             'Pragma': 'no-cache',
             'Sec-Fetch-Dest': 'document',
             'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
+            'Sec-Fetch-Site': 'cross-site',
             'TE': 'trailers',
-            'Upgrade-Insecure-Requests': '1',
-            'X-Requested-With': 'XMLHttpRequest'
+            'Upgrade-Insecure-Requests': '1'
         }
-    })).json()
+    })).text()
 
-    data.csrfToken = sharedData.config.csrf_token
+    var rolloutHash = instagramLogin.match(/"rollout_hash":"([^"]+)"/)
+    if (!rolloutHash) {
+        console.log(`instagram: failed to log in`)
+        return false;
+    }
 
+    rolloutHash = rolloutHash[1]
+    data.rolloutHash = rolloutHash
+
+    var csrfToken = instagramLogin.match(/"csrf_token":"([^"]+)"/)
+    if (!csrfToken) {
+        console.log(`instagram: failed to log in`)
+        return false;
+    }
+
+    csrfToken = csrfToken[1]
+    data.csrfToken = csrfToken
+
+    //instagram and threads are largely the same (thank god)
     //fun fact: i spent 2 hours trying to figure out how to encrypt a password, then realized if you just pass it a version number of 0, itll let you send an unencrypted password. Why
-    var body = `enc_password=${encodeURIComponent(`#PWD_INSTAGRAM_BROWSER:0:${Math.floor(Date.now()/1000)}:${config.threads.password}`)}&optIntoOneTap=false&queryParams=${encodeURIComponent('{}')}&stopDeletionNonce=&textAppStopDeletionToken=&username=${encodeURIComponent(config.threads.email)}`
+    var body = `enc_password=${encodeURIComponent(`#PWD_INSTAGRAM_BROWSER:0:${Math.floor(Date.now()/1000)}:${config.instagram.password}`)}&optIntoOneTap=false&queryParams=${encodeURIComponent('{}')}&stopDeletionNonce=&textAppStopDeletionToken=&username=${encodeURIComponent(config.instagram.email)}`
 
-    var loginRes = await fetch('https://www.threads.net/api/v1/web/accounts/login/ajax/', {
+    var loginRes = await fetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/', {
         headers: {
             'User-Agent': config.scrapingUserAgent,
             'Accept': '*/*',
@@ -51,15 +67,17 @@ async function init() {
             'Accept-Langauge': 'en-US,en;q=0.5',
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
             'Dpr': '1',
-            'Referer': 'https://www.threads.net/login',
+            'Referer': 'https://www.instagram.com/',
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
-            'Viewport-Width': '1901',
+            'Viewport-Width': '1920',
             'X-Asbd-Id': '129477',
             'X-Csrftoken': data.csrfToken,
             'X-Ig-App-Id': data.appId,
-            'X-Instagram-Ajax': '0'
+            'X-Ig-Www-Claim': '0',
+            'X-Instagram-Ajax': rolloutHash,
+            'X-Requested-With': 'XMLHttpRequest'
         },
         method: 'POST',
         body: body
@@ -70,56 +88,12 @@ async function init() {
     if (loginData.user) {
         data.cookie = loginRes.headers.getSetCookie().map(cookie => cookie.split(';')[0]).join('; ')
         data.csrfToken = data.cookie.split('csrftoken=')[1].split(';')[0]
-        console.log(`threads: logged in as user id ${loginData.userId} (${config.threads.email})`)
-
-        //setInterval(refreshCsrf, config.threads.refreshIntervalMs)
+        console.log(`instagram: logged in as user id ${loginData.userId} (${config.instagram.email})`)
     } else { //if you do it too many times, itll just say the password was incorrect even though it wasnt (maybe to deter hackers / waste their time?)
-        console.log(`threads: failed to log in`)
+        console.log(`instagram: failed to log in`)
         return false;
     }
 }
-
-//not exactly necessary
-/*
-async function refreshCsrf() {
-    var sharedRes = await fetch('https://www.instagram.com/data/shared_data/', {
-        headers: {
-            'User-Agent': config.scrapingUserAgent,
-            'Accept': '/*\/',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Langauge': 'en-US,en;q=0.5',
-            'Alt-Used': 'www.threads.net',
-            'Cache-Control': 'no-cache',
-            'Cookie': data.cookie,
-            'Pragma': 'no-cache',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'TE': 'trailers',
-            'Upgrade-Insecure-Requests': '1',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-
-    if (!sharedRes.ok) {
-        config.threads.use = false;
-        console.log('threads: failed to refresh csrf, disabled threads')
-        return false;
-    }
-
-    var sharedData = await sharedRes.json()
-
-    if (!sharedData.config.viewer) {
-        console.log('threads: failed to refresh csrf, disabled threads')
-        return false;
-    }
-
-    data.csrfToken = sharedData.config.csrf_token
-
-    return true;
-}
-*/
 
 async function post(fileName, filePath, mimeType) {
     try {
@@ -127,9 +101,9 @@ async function post(fileName, filePath, mimeType) {
         var timestamp = Date.now()
         var entityName = `fb_uploader_${timestamp}`
         var isImage = mimeType.split('/')[0] == 'image'
-        var ruploadParams = isImage ? JSON.stringify({ is_sidecar: '0', is_threads: '1', media_type: '1', upload_id: timestamp.toString() }) : JSON.stringify({ extract_cover_frame: '1', is_sidecar: '0', is_threads: '1', media_type: '2', upload_id: timestamp.toString() })
+        var ruploadParams = isImage ? JSON.stringify({ media_type: '1', upload_id: timestamp.toString() }) : JSON.stringify({ extract_cover_frame: '1', media_type: '2', upload_id: timestamp.toString() })
 
-        var uploadRes = await fetch(`https://www.threads.net/rupload_ig${isImage ? 'photo' : 'video'}/${entityName}`, {
+        var uploadRes = await fetch(`https://i.instagram.com/rupload_ig${isImage ? 'photo' : 'video'}/${entityName}`, {
             headers: {
                 'User-Agent': config.scrapingUserAgent,
                 'Accept': '*/*',
@@ -141,9 +115,9 @@ async function post(fileName, filePath, mimeType) {
                 'Cookie': data.cookie,
                 'Dpr': '1',
                 'Offset': '0',
-                'Origin': 'https://www.threads.net',
+                'Origin': 'https://www.instagram.com',
                 'Pragma': 'no-cache',
-                'Referer': 'https://www.threads.net/',
+                'Referer': 'https://www.instagram.com/',
                 'Sec-Fetch-Dest': 'empty',
                 'Sec-Fetch-Mode': 'cors',
                 'Sec-Fetch-Site': 'same-origin',
@@ -152,6 +126,7 @@ async function post(fileName, filePath, mimeType) {
                 'X-Entity-Name': entityName,
                 'X-Entity-Type': mimeType,
                 'X-Ig-App-Id': data.appId,
+                'X-Instagram-Ajax': data.rolloutHash,
                 'X-Instagram-Rupload-Params': ruploadParams
             },
             method: 'POST',
@@ -166,18 +141,45 @@ async function post(fileName, filePath, mimeType) {
         var uploadData = await uploadRes.json()
         var uploadId = isImage ? uploadData.upload_id : timestamp.toString()
 
+        //very stupid way of doing it but i couldnt find another way to get the www claim
+        var instagramHome = await (await fetch('https://www.instagram.com/', {
+            headers: {
+                'User-Agent': config.scrapingUserAgent,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*\/*;q=0.8',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Accept-Langauge': 'en-US,en;q=0.5',
+                'Alt-Used': 'www.instagram.com',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'cross-site',
+                'TE': 'trailers',
+                'Upgrade-Insecure-Requests': '1'
+            }
+        })).text()
+    
+        var wwwClaim = instagramHome.match(/,"claim":"([^"]+)"/) //parse www claim out of json in script
+        if (!wwwClaim) throw 'claim:failed_to_parse_www_claim_from_instagram_home';
+
+        wwwClaim = wwwClaim[1]
+
         var postBody = [
+            'archive_only=false',
             `caption=${encodeURIComponent(fileName)}`,
-            'custom_accessibility_caption=',
-            'internal_features=',
-            'is_meta_only_post=',
-            'is_paid_partnership=',
-            'is_threads=true', //text only posts dont have this
-            `text_post_app_info=${encodeURIComponent(JSON.stringify({ link_attachment_url: null, reply_control: 0, text_with_entities: { entities: [], text: fileName }}))}`,
-            `upload_id=${uploadId}` //text only posts just provide Date.now() for this
+            'clips_share_preview_to_feed=1',
+            'disable_comments=0',
+            'disable_oa_reuse=false',
+            'igtv_share_preview_to_feed=1',
+            'is_meta_only_post=0',
+            'is_unified_video=1', //even if its a photo
+            'like_and_view_counts_disabled=0',
+            'source_type=library',
+            `upload_id=${uploadId}`,
+            'video_subtitles_enabled=0'
         ].join('&')
 
-        var postRes = await fetch('https://www.threads.net/api/v1/media/configure_text_post_app_feed/', { //for text only posts: https://www.threads.net/api/v1/media/configure_text_only_post/
+        var postRes = await fetch('https://www.instagram.com/api/v1/media/configure/', {
             headers: {
                 'User-Agent': config.scrapingUserAgent,
                 'Accept': '*/*',
@@ -187,9 +189,9 @@ async function post(fileName, filePath, mimeType) {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
                 'Cookie': data.cookie,
                 'Dpr': '1',
-                'Origin': 'https://www.threads.net',
+                'Origin': 'https://www.instagram.com',
                 'Pragma': 'no-cache',
-                'Referer': 'https://www.threads.net/',
+                'Referer': 'https://www.instagram.com/',
                 'Sec-Fetch-Dest': 'empty',
                 'Sec-Fetch-Mode': 'cors',
                 'Sec-Fetch-Site': 'same-origin',
@@ -197,7 +199,9 @@ async function post(fileName, filePath, mimeType) {
                 'X-Asbd-Id': '129477',
                 'X-Csrftoken': data.csrfToken,
                 'X-Ig-App-Id': data.appId,
-                'X-Instagram-Ajax': '0'
+                'X-Ig-Www-Claim': wwwClaim,
+                'X-Instagram-Ajax': data.rolloutHash,
+                'X-Requested-With': 'XMLHttpRequest'
             },
             method: 'POST',
             body: postBody
@@ -213,7 +217,7 @@ async function post(fileName, filePath, mimeType) {
 
         done()
     } catch (err) {
-        console.log(`threads: failed to post ${fileName}`)
+        console.log(`instagram: failed to post ${fileName}`)
         console.error(err)
         done()
     }
@@ -225,5 +229,5 @@ module.exports.onDone = function(callback) {
     done = callback;
 }
 module.exports.isEnabled = function() {
-    return config.threads.use;
+    return config.instagram.use;
 }
