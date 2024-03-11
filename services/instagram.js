@@ -10,9 +10,9 @@ if (!config.instagram.use) return;
 if (config.instagram.use && !config.instagram.password) return console.log('missing instagram password');
 if (config.instagram.use && !config.instagram.email) return console.log('missing instagram email');
 
-var done = function() {};
+let done = function() {};
 
-var data = {
+let data = {
     appId: '936619743392459',
     csrfToken: '',
     rolloutHash: '',
@@ -20,7 +20,7 @@ var data = {
 }
 
 async function init() {
-    var instagramLogin = await (await fetch('https://www.instagram.com/', {
+    let instagramLogin = await (await fetch('https://www.instagram.com/', {
         headers: {
             'User-Agent': config.scrapingUserAgent,
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*\/*;q=0.8',
@@ -37,7 +37,7 @@ async function init() {
         }
     })).text()
 
-    var rolloutHash = instagramLogin.match(/"rollout_hash":"([^"]+)"/)
+    let rolloutHash = instagramLogin.match(/"rollout_hash":"([^"]+)"/)
     if (!rolloutHash) {
         console.log(`instagram: failed to log in`)
         return false;
@@ -46,7 +46,7 @@ async function init() {
     rolloutHash = rolloutHash[1]
     data.rolloutHash = rolloutHash
 
-    var csrfToken = instagramLogin.match(/"csrf_token":"([^"]+)"/)
+    let csrfToken = instagramLogin.match(/"csrf_token":"([^"]+)"/)
     if (!csrfToken) {
         console.log(`instagram: failed to log in`)
         return false;
@@ -57,9 +57,9 @@ async function init() {
 
     //instagram and threads are largely the same (thank god)
     //fun fact: i spent 2 hours trying to figure out how to encrypt a password, then realized if you just pass it a version number of 0, itll let you send an unencrypted password. Why
-    var body = `enc_password=${encodeURIComponent(`#PWD_INSTAGRAM_BROWSER:0:${Math.floor(Date.now()/1000)}:${config.instagram.password}`)}&optIntoOneTap=false&queryParams=${encodeURIComponent('{}')}&stopDeletionNonce=&textAppStopDeletionToken=&username=${encodeURIComponent(config.instagram.email)}`
+    let body = `enc_password=${encodeURIComponent(`#PWD_INSTAGRAM_BROWSER:0:${Math.floor(Date.now()/1000)}:${config.instagram.password}`)}&optIntoOneTap=false&queryParams=${encodeURIComponent('{}')}&stopDeletionNonce=&textAppStopDeletionToken=&username=${encodeURIComponent(config.instagram.email)}`
 
-    var loginRes = await fetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/', {
+    let loginRes = await fetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/', {
         headers: {
             'User-Agent': config.scrapingUserAgent,
             'Accept': '*/*',
@@ -83,7 +83,7 @@ async function init() {
         body: body
     })
 
-    var loginData = await loginRes.json()
+    let loginData = await loginRes.json()
 
     if (loginData.user) {
         data.cookie = loginRes.headers.getSetCookie().map(cookie => cookie.split(';')[0]).join('; ')
@@ -97,13 +97,13 @@ async function init() {
 
 async function post(fileName, filePath, mimeType) {
     try {
-        var file = await fs.readFile(filePath)
-        var timestamp = Date.now()
-        var entityName = `fb_uploader_${timestamp}`
-        var isImage = mimeType.split('/')[0] == 'image'
-        var ruploadParams = isImage ? JSON.stringify({ media_type: '1', upload_id: timestamp.toString() }) : JSON.stringify({ extract_cover_frame: '1', media_type: '2', upload_id: timestamp.toString() })
+        let file = await fs.readFile(filePath)
+        let timestamp = Date.now()
+        let entityName = `fb_uploader_${timestamp}`
+        let isImage = mimeType.split('/')[0] == 'image'
+        let ruploadParams = isImage ? JSON.stringify({ media_type: '1', upload_id: timestamp.toString() }) : JSON.stringify({ extract_cover_frame: '1', media_type: '2', upload_id: timestamp.toString() })
 
-        var uploadRes = await fetch(`https://i.instagram.com/rupload_ig${isImage ? 'photo' : 'video'}/${entityName}`, {
+        let uploadRes = await fetch(`https://i.instagram.com/rupload_ig${isImage ? 'photo' : 'video'}/${entityName}`, {
             headers: {
                 'User-Agent': config.scrapingUserAgent,
                 'Accept': '*/*',
@@ -138,11 +138,11 @@ async function post(fileName, filePath, mimeType) {
             throw `upload:${uploadData}`;
         }
 
-        var uploadData = await uploadRes.json()
-        var uploadId = isImage ? uploadData.upload_id : timestamp.toString()
+        let uploadData = await uploadRes.json()
+        let uploadId = isImage ? uploadData.upload_id : timestamp.toString()
 
         //very stupid way of doing it but i couldnt find another way to get the www claim
-        var instagramHome = await (await fetch('https://www.instagram.com/', {
+        let instagramHome = await (await fetch('https://www.instagram.com/', {
             headers: {
                 'User-Agent': config.scrapingUserAgent,
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*\/*;q=0.8',
@@ -159,12 +159,12 @@ async function post(fileName, filePath, mimeType) {
             }
         })).text()
     
-        var wwwClaim = instagramHome.match(/,"claim":"([^"]+)"/) //parse www claim out of json in script
+        let wwwClaim = instagramHome.match(/,"claim":"([^"]+)"/) //parse www claim out of json in script
         if (!wwwClaim) throw 'claim:failed_to_parse_www_claim_from_instagram_home';
 
         wwwClaim = wwwClaim[1]
 
-        var postBody = [
+        let postBody = [
             'archive_only=false',
             `caption=${encodeURIComponent(fileName)}`,
             'clips_share_preview_to_feed=1',
@@ -179,7 +179,7 @@ async function post(fileName, filePath, mimeType) {
             'video_subtitles_enabled=0'
         ].join('&')
 
-        var postRes = await fetch('https://www.instagram.com/api/v1/media/configure/', {
+        let postRes = await fetch('https://www.instagram.com/api/v1/media/configure/', {
             headers: {
                 'User-Agent': config.scrapingUserAgent,
                 'Accept': '*/*',
@@ -212,7 +212,7 @@ async function post(fileName, filePath, mimeType) {
             throw `post:${postData}`;
         }
 
-        var setCookie = postRes.headers.getSetCookie().map(cookie => cookie.split(';')[0]).join('; ')
+        let setCookie = postRes.headers.getSetCookie().map(cookie => cookie.split(';')[0]).join('; ')
         if (setCookie.includes('csrftoken=')) data.csrfToken = setCookie.split('csrftoken=')[1].split(';')[0]
 
         done()

@@ -8,15 +8,15 @@ if (!config.tumblr.use) return;
 if (config.tumblr.use && !config.tumblr.blog) return console.log('missing tumblr blog');
 if (config.tumblr.use && !config.tumblr.consumerKey) return console.log('missing tumblr consumer key');
 
-var done = function() {};
+let done = function() {};
 
-var consumerKey = config.tumblr.consumerKey
-var consumerSecret = config.tumblr.consumerSecret
-var accessToken;
-var blog = config.tumblr.blog
+let consumerKey = config.tumblr.consumerKey
+let consumerSecret = config.tumblr.consumerSecret
+let accessToken;
+let blog = config.tumblr.blog
 
 async function init() {
-    var tokenData = await (await fetch('https://api.tumblr.com/v2/oauth2/token', {
+    let tokenData = await (await fetch('https://api.tumblr.com/v2/oauth2/token', {
         headers: {
             'Content-Type': 'application/json',
             'User-Agent': config.userAgent
@@ -32,7 +32,7 @@ async function init() {
 
     accessToken = `Bearer ${tokenData.access_token}`;
 
-    var data = await (await fetch('https://api.tumblr.com/v2/user/info', {
+    let data = await (await fetch('https://api.tumblr.com/v2/user/info', {
         headers: {
             'Authorization': accessToken,
             'User-Agent': config.userAgent
@@ -50,7 +50,7 @@ async function init() {
 }
 
 async function checkToken() {
-    var check = await (await fetch('https://api.tumblr.com/v2/user/info', {
+    let check = await (await fetch('https://api.tumblr.com/v2/user/info', {
         headers: {
             'Authorization': accessToken,
             'User-Agent': config.userAgent
@@ -63,7 +63,7 @@ async function checkToken() {
 }
 
 async function refreshToken() {
-    var newToken = await (await fetch('https://api.tumblr.com/v2/oauth2/token', {
+    let newToken = await (await fetch('https://api.tumblr.com/v2/oauth2/token', {
         headers: {
             'Content-Type': 'application/json',
             'User-Agent': config.userAgent
@@ -84,13 +84,13 @@ async function refreshToken() {
 
 async function post(fileName, filePath, mimeType) {
     try {
-        var tokenValid = await checkToken()
+        let tokenValid = await checkToken()
         if (!tokenValid) await refreshToken()
 
-        var file = await fs.readFile(filePath)
-        var postType = mimeType.split('/')[0]
+        let file = await fs.readFile(filePath)
+        let postType = mimeType.split('/')[0]
 
-        var postJson = {
+        let postJson = {
             content: [
                 {
                     type: postType, //"image", "video", "audio"
@@ -104,22 +104,22 @@ async function post(fileName, filePath, mimeType) {
         }
 
         //construct the multipart form data (fuck tumblrs api, what the fuck dude)
-        var boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
+        let boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
 
-        var jsonBound = `--${boundary}\r\n` +
+        let jsonBound = `--${boundary}\r\n` +
         `Content-Disposition: form-data; name="json"\r\n` +
         `Content-Type: application/json\r\n\r\n`
 
-        var fileBound = `--${boundary}\r\n` +
+        let fileBound = `--${boundary}\r\n` +
         `Content-Disposition: form-data; name="media"; filename="${fileName.replaceAll('"', '\\"')}"\r\n` +
         `Content-Type: ${mimeType}\r\n\r\n`
 
-        var endBoundary = `\r\n--${boundary}--\r\n`;
+        let endBoundary = `\r\n--${boundary}--\r\n`;
 
-        var bodyBuffer = Buffer.concat([ Buffer.from(jsonBound), Buffer.from(JSON.stringify(postJson) + '\r\n'), Buffer.from(fileBound), file, Buffer.from(endBoundary) ])
+        let bodyBuffer = Buffer.concat([ Buffer.from(jsonBound), Buffer.from(JSON.stringify(postJson) + '\r\n'), Buffer.from(fileBound), file, Buffer.from(endBoundary) ])
 
         //create the post, with the form data
-        var data = await (await fetch(`https://api.tumblr.com/v2/blog/${blog}/posts`, {
+        let data = await (await fetch(`https://api.tumblr.com/v2/blog/${blog}/posts`, {
             headers: {
                 'Authorization': accessToken,
                 'Content-Type': `multipart/form-data; boundary=${boundary}`,

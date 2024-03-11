@@ -10,16 +10,16 @@ if (!config.threads.use) return;
 if (config.threads.use && !config.threads.password) return console.log('missing threads password');
 if (config.threads.use && !config.threads.email) return console.log('missing threads email');
 
-var done = function() {};
+let done = function() {};
 
-var data = {
+let data = {
     appId: '238260118697367',
     csrfToken: '',
     cookie: ''
 }
 
 async function init() {
-    var sharedData = await (await fetch('https://www.instagram.com/data/shared_data/', {
+    let sharedData = await (await fetch('https://www.instagram.com/data/shared_data/', {
         headers: {
             'User-Agent': config.scrapingUserAgent,
             'Accept': '\/*/',
@@ -41,9 +41,9 @@ async function init() {
     data.csrfToken = sharedData.config.csrf_token
 
     //fun fact: i spent 2 hours trying to figure out how to encrypt a password, then realized if you just pass it a version number of 0, itll let you send an unencrypted password. Why
-    var body = `enc_password=${encodeURIComponent(`#PWD_INSTAGRAM_BROWSER:0:${Math.floor(Date.now()/1000)}:${config.threads.password}`)}&optIntoOneTap=false&queryParams=${encodeURIComponent('{}')}&stopDeletionNonce=&textAppStopDeletionToken=&username=${encodeURIComponent(config.threads.email)}`
+    let body = `enc_password=${encodeURIComponent(`#PWD_INSTAGRAM_BROWSER:0:${Math.floor(Date.now()/1000)}:${config.threads.password}`)}&optIntoOneTap=false&queryParams=${encodeURIComponent('{}')}&stopDeletionNonce=&textAppStopDeletionToken=&username=${encodeURIComponent(config.threads.email)}`
 
-    var loginRes = await fetch('https://www.threads.net/api/v1/web/accounts/login/ajax/', {
+    let loginRes = await fetch('https://www.threads.net/api/v1/web/accounts/login/ajax/', {
         headers: {
             'User-Agent': config.scrapingUserAgent,
             'Accept': '*/*',
@@ -65,7 +65,7 @@ async function init() {
         body: body
     })
 
-    var loginData = await loginRes.json()
+    let loginData = await loginRes.json()
 
     if (loginData.user) {
         data.cookie = loginRes.headers.getSetCookie().map(cookie => cookie.split(';')[0]).join('; ')
@@ -82,7 +82,7 @@ async function init() {
 //not exactly necessary
 /*
 async function refreshCsrf() {
-    var sharedRes = await fetch('https://www.instagram.com/data/shared_data/', {
+    let sharedRes = await fetch('https://www.instagram.com/data/shared_data/', {
         headers: {
             'User-Agent': config.scrapingUserAgent,
             'Accept': '/*\/',
@@ -108,7 +108,7 @@ async function refreshCsrf() {
         return false;
     }
 
-    var sharedData = await sharedRes.json()
+    let sharedData = await sharedRes.json()
 
     if (!sharedData.config.viewer) {
         console.log('threads: failed to refresh csrf, disabled threads')
@@ -123,13 +123,13 @@ async function refreshCsrf() {
 
 async function post(fileName, filePath, mimeType) {
     try {
-        var file = await fs.readFile(filePath)
-        var timestamp = Date.now()
-        var entityName = `fb_uploader_${timestamp}`
-        var isImage = mimeType.split('/')[0] == 'image'
-        var ruploadParams = isImage ? JSON.stringify({ is_sidecar: '0', is_threads: '1', media_type: '1', upload_id: timestamp.toString() }) : JSON.stringify({ extract_cover_frame: '1', is_sidecar: '0', is_threads: '1', media_type: '2', upload_id: timestamp.toString() })
+        let file = await fs.readFile(filePath)
+        let timestamp = Date.now()
+        let entityName = `fb_uploader_${timestamp}`
+        let isImage = mimeType.split('/')[0] == 'image'
+        let ruploadParams = isImage ? JSON.stringify({ is_sidecar: '0', is_threads: '1', media_type: '1', upload_id: timestamp.toString() }) : JSON.stringify({ extract_cover_frame: '1', is_sidecar: '0', is_threads: '1', media_type: '2', upload_id: timestamp.toString() })
 
-        var uploadRes = await fetch(`https://www.threads.net/rupload_ig${isImage ? 'photo' : 'video'}/${entityName}`, {
+        let uploadRes = await fetch(`https://www.threads.net/rupload_ig${isImage ? 'photo' : 'video'}/${entityName}`, {
             headers: {
                 'User-Agent': config.scrapingUserAgent,
                 'Accept': '*/*',
@@ -163,10 +163,10 @@ async function post(fileName, filePath, mimeType) {
             throw `upload:${uploadData}`;
         }
 
-        var uploadData = await uploadRes.json()
-        var uploadId = isImage ? uploadData.upload_id : timestamp.toString()
+        let uploadData = await uploadRes.json()
+        let uploadId = isImage ? uploadData.upload_id : timestamp.toString()
 
-        var postBody = [
+        let postBody = [
             `caption=${encodeURIComponent(fileName)}`,
             'custom_accessibility_caption=',
             'internal_features=',
@@ -177,7 +177,7 @@ async function post(fileName, filePath, mimeType) {
             `upload_id=${uploadId}` //text only posts just provide Date.now() for this
         ].join('&')
 
-        var postRes = await fetch('https://www.threads.net/api/v1/media/configure_text_post_app_feed/', { //for text only posts: https://www.threads.net/api/v1/media/configure_text_only_post/
+        let postRes = await fetch('https://www.threads.net/api/v1/media/configure_text_post_app_feed/', { //for text only posts: https://www.threads.net/api/v1/media/configure_text_only_post/
             headers: {
                 'User-Agent': config.scrapingUserAgent,
                 'Accept': '*/*',
@@ -208,7 +208,7 @@ async function post(fileName, filePath, mimeType) {
             throw `post:${postData}`;
         }
 
-        var setCookie = postRes.headers.getSetCookie().map(cookie => cookie.split(';')[0]).join('; ')
+        let setCookie = postRes.headers.getSetCookie().map(cookie => cookie.split(';')[0]).join('; ')
         if (setCookie.includes('csrftoken=')) data.csrfToken = setCookie.split('csrftoken=')[1].split(';')[0]
 
         done()

@@ -8,7 +8,7 @@ const mime = require('mime-types')
 const config = require('./config.json')
 
 //code
-var platforms = {
+let platforms = {
     twitter: require('./services/twitter.js'),
     bluesky: require('./services/bluesky.js'),
     threads: require('./services/threads.js'),
@@ -19,7 +19,7 @@ var platforms = {
     firefish: require('./services/firefish.js')
 }
 
-var platformKeys = Object.keys(platforms);
+let platformKeys = Object.keys(platforms);
 platformKeys = platformKeys.reverse()
 platformKeys = platformKeys.sort((a, b) => {
     let indexA = config.priorityList.indexOf(a)
@@ -40,8 +40,8 @@ platformKeys = platformKeys.sort((a, b) => {
     return indexA - indexB;
 })
 
-var usedPlatforms = [];
-var doneCount = 0;
+let usedPlatforms = [];
+let doneCount = 0;
 
 function logSegment() {
     return console.log('-'.repeat(64));
@@ -53,9 +53,9 @@ async function initialize() {
     if (config.syncPosts) {
         console.log('sync posts is on; compatible media types are limited to only ones all used platforms support, which removes a lot of potential for posts')
 
-        var configs = platformKeys.map((platform) => config[platform])
-        var allMimeTypes = configs.filter(config => config.use && config.mimeTypes).map(config => config.mimeTypes)
-        var commonMimeTypes = allMimeTypes[0].filter((value) => allMimeTypes.every((array) => array.includes(value)))
+        let configs = platformKeys.map((platform) => config[platform])
+        let allMimeTypes = configs.filter(config => config.use && config.mimeTypes).map(config => config.mimeTypes)
+        let commonMimeTypes = allMimeTypes[0].filter((value) => allMimeTypes.every((array) => array.includes(value)))
 
         config.mimeTypes = commonMimeTypes;
     } else {
@@ -64,11 +64,12 @@ async function initialize() {
 
     for (let platform of platformKeys) {
         if (config[platform].use) {
+            let response;
             try {
-                var response = await platforms[platform].init()
+                response = await platforms[platform].init()
             } catch {
                 console.log(`uncaught error occurred while initializing ${platform}, disabling`)
-                var response = false;
+                response = false;
             }
 
             if (response === false) {
@@ -88,7 +89,7 @@ async function initialize() {
 }
 
 async function postRandomFile() {
-    var file = await getRandomFile(config.syncPosts ? config.mimeTypes : null);
+    let file = await getRandomFile(config.syncPosts ? config.mimeTypes : null);
     console.log(`posting ${file.fileName}`)
 
     for (let platform of platformKeys) { //a bit hard to read but its dynamic so i wont really ever have to change this
@@ -99,7 +100,7 @@ async function postRandomFile() {
         if (platformConfig.mimeTypes && !platformConfig.mimeTypes.includes(file.mimeType) && !config.syncPosts) {
             console.log(`${platform}: ${file.mimeType} unsuitable, picking different file for ${platform}`)
 
-            var differentFile = await getRandomFile(platformConfig.mimeTypes);
+            let differentFile = await getRandomFile(platformConfig.mimeTypes);
             console.log(`${platform}: posting ${differentFile.fileName}`)
 
             platforms[platform].post(differentFile.fileName, differentFile.filePath, differentFile.mimeType)
@@ -116,19 +117,19 @@ async function postRandomFile() {
 }
 
 async function getRandomFile(mimeTypes) {
-    var files = await fs.readdir(config.directory)
+    let files = await fs.readdir(config.directory)
     if (mimeTypes) files = files.filter(name => mimeTypes.includes(mime.lookup(name))) //remove all mime types that arent in mimeTypes (if mimeTypes is supplied)
     if (files.length < 1) {
         console.log(`no files fitting these mime types could be found: ${mimeTypes.join(', ')}`)
         return { error: true };
     }
 
-    var fileName = files[Math.floor(Math.random() * files.length)]
-    var filePath = path.join(config.directory, fileName)
-    var fileExtension = path.parse(fileName).ext?.toLowerCase()
+    let fileName = files[Math.floor(Math.random() * files.length)]
+    let filePath = path.join(config.directory, fileName)
+    let fileExtension = path.parse(fileName).ext?.toLowerCase()
     if (!fileExtension) return getRandomFile(mimeTypes);
 
-    var mimeType = mime.lookup(fileExtension)
+    let mimeType = mime.lookup(fileExtension)
 
     return { fileName, filePath, mimeType };
 }

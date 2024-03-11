@@ -8,13 +8,13 @@ if (!config.mastodon.use) return;
 if (config.mastodon.use && !config.mastodon.instance) return console.log('missing mastodon instance');
 if (config.mastodon.use && !config.mastodon.accessToken) return console.log('missing mastodon client key');
 
-var done = function() {};
+let done = function() {};
 
-var accessToken = config.mastodon.accessToken;
-var baseUrl = `https://${config.mastodon.instance}`
+let accessToken = config.mastodon.accessToken;
+let baseUrl = `https://${config.mastodon.instance}`
 
 async function init() {
-    var data = await (await fetch(`${baseUrl}/api/v1/apps/verify_credentials`, {
+    let data = await (await fetch(`${baseUrl}/api/v1/apps/verify_credentials`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
             'User-Agent': config.userAgent
@@ -32,21 +32,21 @@ async function init() {
 
 async function post(fileName, filePath, mimeType) {
     try {
-        var file = await fs.readFile(filePath)
+        let file = await fs.readFile(filePath)
 
         //construct the multipart form data
-        var boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
+        let boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
 
-        var body = `--${boundary}\r\n` +
+        let body = `--${boundary}\r\n` +
         `Content-Disposition: form-data; name="file"; filename="${fileName.replaceAll('"', '\\"')}"\r\n` +
         `Content-Type: ${mimeType}\r\n\r\n`
 
-        var endBoundary = `\r\n--${boundary}--\r\n`;
+        let endBoundary = `\r\n--${boundary}--\r\n`;
 
-        var bodyBuffer = Buffer.concat([ Buffer.from(body), file, Buffer.from(endBoundary) ])
+        let bodyBuffer = Buffer.concat([ Buffer.from(body), file, Buffer.from(endBoundary) ])
 
         //upload it to the instance's api
-        var uploadData = await (await fetch(`${baseUrl}/api/v2/media`, {
+        let uploadData = await (await fetch(`${baseUrl}/api/v2/media`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': `multipart/form-data; boundary=${boundary}`,
@@ -65,7 +65,7 @@ async function post(fileName, filePath, mimeType) {
             try {
                 return await new Promise(async (resolve, reject) => {
                     async function check() {
-                        var data = await (await fetch(`${baseUrl}/api/v1/media/${uploadData.id}`, {
+                        let data = await (await fetch(`${baseUrl}/api/v1/media/${uploadData.id}`, {
                             headers: {
                                 'Authorization': `Bearer ${accessToken}`,
                                 'User-Agent': config.userAgent,
@@ -89,8 +89,8 @@ async function post(fileName, filePath, mimeType) {
         }
 
         //create the post with the media
-        var statusBody = JSON.stringify({ status: fileName, content_type: 'text/markdown', in_reply_to_id: null, media_ids: [ uploadData.id ], sensitive: false, spoiler_text: '', visibility: 'unlisted', poll: null, language: 'en' })
-        var statusData = await (await fetch(`${baseUrl}/api/v1/statuses`, {
+        let statusBody = JSON.stringify({ status: fileName, content_type: 'text/markdown', in_reply_to_id: null, media_ids: [ uploadData.id ], sensitive: false, spoiler_text: '', visibility: 'unlisted', poll: null, language: 'en' })
+        let statusData = await (await fetch(`${baseUrl}/api/v1/statuses`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',

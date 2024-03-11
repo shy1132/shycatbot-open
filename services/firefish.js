@@ -8,13 +8,13 @@ if (!config.firefish.use) return;
 if (config.firefish.use && !config.firefish.instance) return console.log('missing firefish instance');
 if (config.firefish.use && !config.firefish.token) return console.log('missing firefish token');
 
-var done = function() {};
+let done = function() {};
 
-var token = config.firefish.token;
-var baseUrl = `https://${config.firefish.instance}`
+let token = config.firefish.token;
+let baseUrl = `https://${config.firefish.instance}`
 
 async function init() {
-    var data = await (await fetch(`${baseUrl}/api/i`, {
+    let data = await (await fetch(`${baseUrl}/api/i`, {
         headers: {
             'Authorization': `Bearer ${token}`,
             'User-Agent': config.userAgent
@@ -33,11 +33,11 @@ async function init() {
 
 async function post(fileName, filePath, mimeType) {
     try {
-        var file = await fs.readFile(filePath)
+        let file = await fs.readFile(filePath)
 
         //construct the multipart form data
-        var boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
-        var body = ''
+        let boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
+        let body = ''
 
         body += `--${boundary}\r\n` +
         `Content-Disposition: form-data; name="force"\r\n\r\n` +
@@ -51,12 +51,12 @@ async function post(fileName, filePath, mimeType) {
         `Content-Disposition: form-data; name="file"; filename="${fileName.replaceAll('"', '\\"')}"\r\n` +
         `Content-Type: ${mimeType}\r\n\r\n`
 
-        var endBoundary = `\r\n--${boundary}--\r\n`;
+        let endBoundary = `\r\n--${boundary}--\r\n`;
 
-        var bodyBuffer = Buffer.concat([ Buffer.from(body), file, Buffer.from(endBoundary) ])
+        let bodyBuffer = Buffer.concat([ Buffer.from(body), file, Buffer.from(endBoundary) ])
 
         //upload it to the user's drive
-        var uploadData = await (await fetch(`${baseUrl}/api/drive/files/create`, {
+        let uploadData = await (await fetch(`${baseUrl}/api/drive/files/create`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': `multipart/form-data; boundary=${boundary}`,
@@ -69,8 +69,8 @@ async function post(fileName, filePath, mimeType) {
         if (!uploadData.id) throw `upload:${JSON.stringify(uploadData)}`;
 
         //create the post with the media
-        var noteBody = JSON.stringify({ text: fileName, fileIds: [ uploadData.id ], localOnly: false, poll: null, visibility: 'home' })
-        var noteData = await (await fetch(`${baseUrl}/api/notes/create`, {
+        let noteBody = JSON.stringify({ text: fileName, fileIds: [ uploadData.id ], localOnly: false, poll: null, visibility: 'home' })
+        let noteData = await (await fetch(`${baseUrl}/api/notes/create`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',

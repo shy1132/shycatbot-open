@@ -6,9 +6,9 @@ const config = require('../config.json')
 if (!config.twitter.use) return;
 if (config.twitter.use && !config.twitter.appKey) return console.log('missing twitter keys');
 
-var done = function() {};
+let done = function() {};
 
-var client;
+let client;
 
 async function init() {
     client = new TwitterApi({
@@ -20,7 +20,7 @@ async function init() {
         strictSSL: true
     })
 
-    var user = await client.v2.me()
+    let user = await client.v2.me()
 
     if (user?.data?.username) {
         console.log(`twitter: logged in as @${user.data.username}`)
@@ -33,7 +33,7 @@ async function init() {
 
 async function post(fileName, filePath) {
     try {
-        var media = await client.v1.uploadMedia(filePath)
+        let media = await client.v1.uploadMedia(filePath)
         await client.v2.tweet(fileName, { media: { media_ids: [ media ] } })
         done()
     } catch (err) {

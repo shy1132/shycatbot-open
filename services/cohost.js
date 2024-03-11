@@ -11,15 +11,15 @@ if (config.cohost.use && !config.cohost.email) return console.log('missing cohos
 if (config.cohost.handle.startsWith('@')) config.cohost.handle = config.cohost.handle.substr(1);
 
 const pbkdf2 = util.promisify(crypto.pbkdf2)
-var done = function() {};
+let done = function() {};
 
-var cookie;
+let cookie;
 
 async function init() {
-    var jsonBody = { '0': { email: config.cohost.email }}
+    let jsonBody = { '0': { email: config.cohost.email }}
 
     //get the salt from the server
-    var saltData = await (await fetch(`https://cohost.org/api/v1/trpc/login.getSalt?batch=1&input=${encodeURIComponent(JSON.stringify(jsonBody))}`, {
+    let saltData = await (await fetch(`https://cohost.org/api/v1/trpc/login.getSalt?batch=1&input=${encodeURIComponent(JSON.stringify(jsonBody))}`, {
         headers: {
             'User-Agent': config.userAgent
         }
@@ -31,9 +31,9 @@ async function init() {
     }
 
     //convert the salt to a buffer, from a base64 string
-    var salt = Buffer.from(saltData[0].result.data.salt.replaceAll('-', 'A').replaceAll('_', 'A'), 'base64')
+    let salt = Buffer.from(saltData[0].result.data.salt.replaceAll('-', 'A').replaceAll('_', 'A'), 'base64')
 
-    var pbkdf2Parameters = {
+    let pbkdf2Parameters = {
         password: Buffer.from(config.cohost.password, 'utf-8'),
         salt,
         iterations: 2e5,
@@ -42,13 +42,13 @@ async function init() {
     }
 
     //hash the password
-    var hashedPassword = await pbkdf2(pbkdf2Parameters.password, pbkdf2Parameters.salt, pbkdf2Parameters.iterations, pbkdf2Parameters.keylen, pbkdf2Parameters.digest)
+    let hashedPassword = await pbkdf2(pbkdf2Parameters.password, pbkdf2Parameters.salt, pbkdf2Parameters.iterations, pbkdf2Parameters.keylen, pbkdf2Parameters.digest)
     hashedPassword = hashedPassword.toString('base64')
 
     jsonBody[0].clientHash = hashedPassword;
 
     //log in with the hashed password
-    var loginResponse = await fetch('https://cohost.org/api/v1/trpc/login.login?batch=1', {
+    let loginResponse = await fetch('https://cohost.org/api/v1/trpc/login.login?batch=1', {
         headers: {
             'Content-Type': 'application/json',
             'User-Agent': config.userAgent
@@ -57,7 +57,7 @@ async function init() {
         body: JSON.stringify(jsonBody)
     })
 
-    var loginData = await loginResponse.json()
+    let loginData = await loginResponse.json()
 
     if (loginData[0]?.result?.data?.userId) {
         cookie = loginResponse.headers.get('set-cookie')
@@ -71,10 +71,10 @@ async function init() {
 
 async function post(fileName, filePath, mimeType) {
     try {
-        var file = await fs.readFile(filePath)
+        let file = await fs.readFile(filePath)
 
         //create a post
-        var postJson = {
+        let postJson = {
             '0': {
                 projectHandle: config.cohost.handle,
                 content: {
@@ -96,7 +96,7 @@ async function post(fileName, filePath, mimeType) {
             }
         }
 
-        var postCreate = await (await fetch('https://cohost.org/api/v1/trpc/posts.create?batch=1', {
+        let postCreate = await (await fetch('https://cohost.org/api/v1/trpc/posts.create?batch=1', {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookie,
@@ -107,10 +107,10 @@ async function post(fileName, filePath, mimeType) {
         })).json()
 
         if (!postCreate[0]?.result?.data?.postId) throw `postCreate:${JSON.stringify(postCreate)}`;
-        var postId = postCreate[0].result.data.postId
+        let postId = postCreate[0].result.data.postId
 
         //tell the cohost api about the attachment
-        var attachmentStart = await (await fetch('https://cohost.org/api/v1/trpc/posts.attachment.start?batch=1', {
+        let attachmentStart = await (await fetch('https://cohost.org/api/v1/trpc/posts.attachment.start?batch=1', {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookie,
@@ -129,12 +129,12 @@ async function post(fileName, filePath, mimeType) {
         })).json()
 
         if (!attachmentStart[0]?.result?.data?.attachmentId) throw `attachmentStart:${JSON.stringify(attachmentStart)}`;
-        var attachment = attachmentStart[0].result.data
-        var attachmentId = attachment.attachmentId
+        let attachment = attachmentStart[0].result.data
+        let attachmentId = attachment.attachmentId
 
         //construct the multipart form data
-        var boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
-        var dataBound = ''
+        let boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
+        let dataBound = ''
 
         for (let key of Object.keys(attachment.requiredFields)) {
             let value = attachment.requiredFields[key].replaceAll('"', '\\"')
@@ -143,16 +143,16 @@ async function post(fileName, filePath, mimeType) {
             `${value}\r\n`
         }
 
-        var fileBound = `--${boundary}\r\n` +
+        let fileBound = `--${boundary}\r\n` +
         `Content-Disposition: form-data; name="file"; filename="${fileName.replaceAll('"', '\\"')}"\r\n` +
         `Content-Type: ${mimeType}\r\n\r\n`
 
-        var endBoundary = `\r\n--${boundary}--\r\n`;
+        let endBoundary = `\r\n--${boundary}--\r\n`;
 
-        var bodyBuffer = Buffer.concat([ Buffer.from(dataBound), Buffer.from(fileBound), file, Buffer.from(endBoundary) ])
+        let bodyBuffer = Buffer.concat([ Buffer.from(dataBound), Buffer.from(fileBound), file, Buffer.from(endBoundary) ])
 
         //upload the multipart form data (including the file) to the cohost cdn
-        var upload = await fetch('https://staging.cohostcdn.org/redcent-dev', {
+        let upload = await fetch('https://staging.cohostcdn.org/redcent-dev', {
             headers: {
                 'Content-Type': `multipart/form-data; boundary=${boundary}`,
                 'User-Agent': config.userAgent
@@ -167,7 +167,7 @@ async function post(fileName, filePath, mimeType) {
         }
 
         //tell the cohost api that the attachment is uploaded
-        var attachmentFinish = await (await fetch('https://cohost.org/api/v1/trpc/posts.attachment.finish?batch=1', {
+        let attachmentFinish = await (await fetch('https://cohost.org/api/v1/trpc/posts.attachment.finish?batch=1', {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookie,
@@ -189,7 +189,7 @@ async function post(fileName, filePath, mimeType) {
         postJson[0].content.blocks[0].attachment.attachmentId = attachmentId;
         postJson[0].postId = postId;
 
-        var postUpdate = await fetch('https://cohost.org/api/v1/trpc/posts.update?batch=1', {
+        let postUpdate = await fetch('https://cohost.org/api/v1/trpc/posts.update?batch=1', {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookie,

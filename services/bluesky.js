@@ -8,16 +8,16 @@ if (config.bluesky.use && !config.bluesky.appPassword) return console.log('missi
 if (config.bluesky.use && !config.bluesky.handle) return console.log('missing bluesky handle');
 if (config.bluesky.handle.startsWith('@')) config.bluesky.handle = config.bluesky.handle.substr(1);
 
-var done = function() {};
+let done = function() {};
 
-var session = {
+let session = {
     accessJwt: null,
     refreshJwt: null,
     handle: null
 }
 
 async function init() {
-    var data = await (await fetch('https://bsky.social/xrpc/com.atproto.server.createSession', {
+    let data = await (await fetch('https://bsky.social/xrpc/com.atproto.server.createSession', {
         headers: {
             'Content-Type': 'application/json',
             'User-Agent': config.userAgent
@@ -42,7 +42,7 @@ async function init() {
 }
 
 async function checkSession() {
-    var check = await fetch('https://bsky.social/xrpc/com.atproto.server.getSession', {
+    let check = await fetch('https://bsky.social/xrpc/com.atproto.server.getSession', {
         headers: {
             'Authorization': `Bearer ${session.accessJwt}`,
             'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ async function checkSession() {
 async function refreshSession() {
     //console.log('bluesky: refreshing session')
 
-    var refresh = await (await fetch('https://bsky.social/xrpc/com.atproto.server.refreshSession', {
+    let refresh = await (await fetch('https://bsky.social/xrpc/com.atproto.server.refreshSession', {
         headers: {
             'Authorization': `Bearer ${session.refreshJwt}`,
             'Content-Type': 'application/json',
@@ -82,13 +82,13 @@ async function refreshSession() {
 
 async function post(fileName, filePath, mimeType) {
     try {
-        var sessionValid = await checkSession()
+        let sessionValid = await checkSession()
         if (!sessionValid) await refreshSession()
 
-        var file = await fs.readFile(filePath)
+        let file = await fs.readFile(filePath)
 
         //upload the file (they dont use multipart form data for some reason, but i dont mind i hate that shit)
-        var upload = await (await fetch('https://bsky.social/xrpc/com.atproto.repo.uploadBlob', {
+        let upload = await (await fetch('https://bsky.social/xrpc/com.atproto.repo.uploadBlob', {
             headers: {
                 'Authorization': `Bearer ${session.accessJwt}`,
                 'Content-Type': mimeType,
@@ -101,8 +101,8 @@ async function post(fileName, filePath, mimeType) {
         if (!upload.blob) throw `upload:${JSON.stringify(upload)}`;
 
         //create the post with the media
-        var postBody = JSON.stringify({ collection: 'app.bsky.feed.post', repo: config.bluesky.handle, record: { $type: 'app.bsky.feed.post', createdAt: new Date().toISOString(), text: fileName, embed: { $type: 'app.bsky.embed.images', images: [ { alt: '', image: upload.blob }]}}})
-        var post = await (await fetch('https://bsky.social/xrpc/com.atproto.repo.createRecord', {
+        let postBody = JSON.stringify({ collection: 'app.bsky.feed.post', repo: config.bluesky.handle, record: { $type: 'app.bsky.feed.post', createdAt: new Date().toISOString(), text: fileName, embed: { $type: 'app.bsky.embed.images', images: [ { alt: '', image: upload.blob }]}}})
+        let post = await (await fetch('https://bsky.social/xrpc/com.atproto.repo.createRecord', {
             headers: {
                 'Authorization': `Bearer ${session.accessJwt}`,
                 'Content-Type': 'application/json',
