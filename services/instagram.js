@@ -22,18 +22,16 @@ let data = {
 async function init() {
     let instagramLogin = await (await fetch('https://www.instagram.com/', {
         headers: {
-            'User-Agent': config.scrapingUserAgent,
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*\/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Langauge': 'en-US,en;q=0.5',
-            'Alt-Used': 'www.instagram.com',
             'Cache-Control': 'no-cache',
             'Pragma': 'no-cache',
             'Sec-Fetch-Dest': 'document',
             'Sec-Fetch-Mode': 'navigate',
             'Sec-Fetch-Site': 'cross-site',
-            'TE': 'trailers',
-            'Upgrade-Insecure-Requests': '1'
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': config.scrapingUserAgent
         }
     })).text()
 
@@ -61,7 +59,6 @@ async function init() {
 
     let loginRes = await fetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/', {
         headers: {
-            'User-Agent': config.scrapingUserAgent,
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Langauge': 'en-US,en;q=0.5',
@@ -71,6 +68,7 @@ async function init() {
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
+            'User-Agent': config.scrapingUserAgent,
             'Viewport-Width': '1920',
             'X-Asbd-Id': '129477',
             'X-Csrftoken': data.csrfToken,
@@ -105,7 +103,6 @@ async function post(fileName, filePath, mimeType) {
 
         let uploadRes = await fetch(`https://i.instagram.com/rupload_ig${isImage ? 'photo' : 'video'}/${entityName}`, {
             headers: {
-                'User-Agent': config.scrapingUserAgent,
                 'Accept': '*/*',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Langauge': 'en-US,en;q=0.5',
@@ -121,6 +118,7 @@ async function post(fileName, filePath, mimeType) {
                 'Sec-Fetch-Dest': 'empty',
                 'Sec-Fetch-Mode': 'cors',
                 'Sec-Fetch-Site': 'same-origin',
+                'User-Agent': config.scrapingUserAgent,
                 'Viewport-Width': '1920',
                 'X-Entity-Length': file.length,
                 'X-Entity-Name': entityName,
@@ -144,18 +142,16 @@ async function post(fileName, filePath, mimeType) {
         //very stupid way of doing it but i couldnt find another way to get the www claim
         let instagramHome = await (await fetch('https://www.instagram.com/', {
             headers: {
-                'User-Agent': config.scrapingUserAgent,
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*\/*;q=0.8',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Langauge': 'en-US,en;q=0.5',
-                'Alt-Used': 'www.instagram.com',
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache',
                 'Sec-Fetch-Dest': 'document',
                 'Sec-Fetch-Mode': 'navigate',
                 'Sec-Fetch-Site': 'cross-site',
-                'TE': 'trailers',
-                'Upgrade-Insecure-Requests': '1'
+                'Upgrade-Insecure-Requests': '1',
+                'User-Agent': config.scrapingUserAgent
             }
         })).text()
     
@@ -181,7 +177,6 @@ async function post(fileName, filePath, mimeType) {
 
         let postRes = await fetch('https://www.instagram.com/api/v1/media/configure/', {
             headers: {
-                'User-Agent': config.scrapingUserAgent,
                 'Accept': '*/*',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Langauge': 'en-US,en;q=0.5',
@@ -195,6 +190,7 @@ async function post(fileName, filePath, mimeType) {
                 'Sec-Fetch-Dest': 'empty',
                 'Sec-Fetch-Mode': 'cors',
                 'Sec-Fetch-Site': 'same-origin',
+                'User-Agent': config.scrapingUserAgent,
                 'Viewport-Width': '1920',
                 'X-Asbd-Id': '129477',
                 'X-Csrftoken': data.csrfToken,

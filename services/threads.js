@@ -21,19 +21,17 @@ let data = {
 async function init() {
     let sharedData = await (await fetch('https://www.instagram.com/data/shared_data/', {
         headers: {
-            'User-Agent': config.scrapingUserAgent,
-            'Accept': '\/*/',
+            'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Langauge': 'en-US,en;q=0.5',
-            'Alt-Used': 'www.threads.net',
             'Cache-Control': 'no-cache',
             'Pragma': 'no-cache',
             'Sec-Fetch-Dest': 'document',
             'Sec-Fetch-Mode': 'navigate',
             'Sec-Fetch-Site': 'none',
             'Sec-Fetch-User': '?1',
-            'TE': 'trailers',
             'Upgrade-Insecure-Requests': '1',
+            'User-Agent': config.scrapingUserAgent,
             'X-Requested-With': 'XMLHttpRequest'
         }
     })).json()
@@ -45,7 +43,6 @@ async function init() {
 
     let loginRes = await fetch('https://www.threads.net/api/v1/web/accounts/login/ajax/', {
         headers: {
-            'User-Agent': config.scrapingUserAgent,
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Langauge': 'en-US,en;q=0.5',
@@ -55,6 +52,7 @@ async function init() {
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
+            'User-Agent': config.scrapingUserAgent,
             'Viewport-Width': '1901',
             'X-Asbd-Id': '129477',
             'X-Csrftoken': data.csrfToken,
@@ -84,11 +82,9 @@ async function init() {
 async function refreshCsrf() {
     let sharedRes = await fetch('https://www.instagram.com/data/shared_data/', {
         headers: {
-            'User-Agent': config.scrapingUserAgent,
-            'Accept': '/*\/',
+            'Accept': '*\/*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Langauge': 'en-US,en;q=0.5',
-            'Alt-Used': 'www.threads.net',
             'Cache-Control': 'no-cache',
             'Cookie': data.cookie,
             'Pragma': 'no-cache',
@@ -96,8 +92,8 @@ async function refreshCsrf() {
             'Sec-Fetch-Mode': 'navigate',
             'Sec-Fetch-Site': 'none',
             'Sec-Fetch-User': '?1',
-            'TE': 'trailers',
             'Upgrade-Insecure-Requests': '1',
+            'User-Agent': config.scrapingUserAgent,
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
@@ -131,7 +127,6 @@ async function post(fileName, filePath, mimeType) {
 
         let uploadRes = await fetch(`https://www.threads.net/rupload_ig${isImage ? 'photo' : 'video'}/${entityName}`, {
             headers: {
-                'User-Agent': config.scrapingUserAgent,
                 'Accept': '*/*',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Langauge': 'en-US,en;q=0.5',
@@ -147,12 +142,13 @@ async function post(fileName, filePath, mimeType) {
                 'Sec-Fetch-Dest': 'empty',
                 'Sec-Fetch-Mode': 'cors',
                 'Sec-Fetch-Site': 'same-origin',
+                'User-Agent': config.scrapingUserAgent,
                 'Viewport-Width': '1920',
                 'X-Entity-Length': file.length,
                 'X-Entity-Name': entityName,
                 'X-Entity-Type': mimeType,
                 'X-Ig-App-Id': data.appId,
-                'X-Instagram-Rupload-Params': ruploadParams
+                'X-Instagram-Rupload-Params': ruploadParams,
             },
             method: 'POST',
             body: file
@@ -179,7 +175,6 @@ async function post(fileName, filePath, mimeType) {
 
         let postRes = await fetch('https://www.threads.net/api/v1/media/configure_text_post_app_feed/', { //for text only posts: https://www.threads.net/api/v1/media/configure_text_only_post/
             headers: {
-                'User-Agent': config.scrapingUserAgent,
                 'Accept': '*/*',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Langauge': 'en-US,en;q=0.5',
@@ -193,6 +188,7 @@ async function post(fileName, filePath, mimeType) {
                 'Sec-Fetch-Dest': 'empty',
                 'Sec-Fetch-Mode': 'cors',
                 'Sec-Fetch-Site': 'same-origin',
+                'User-Agent': config.scrapingUserAgent,
                 'Viewport-Width': '1920',
                 'X-Asbd-Id': '129477',
                 'X-Csrftoken': data.csrfToken,
