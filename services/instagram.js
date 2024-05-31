@@ -213,8 +213,8 @@ async function post(fileName, filePath, mimeType) {
 
         done()
     } catch (err) {
-        console.log(`instagram: failed to post ${fileName}`)
-        console.error(err)
+        console.log(`instagram: failed to post ${fileName}`, err)
+        console.error('instagram error: ', err)
         done()
     }
 }

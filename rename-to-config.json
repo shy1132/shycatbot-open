@@ -5,14 +5,18 @@
         "appSecret": "",
         "accessToken": "",
         "accessSecret": "",
-        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/bmp", "image/gif", "video/mp4", "video/quicktime", "video/x-m4v"]
+        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/bmp", "image/gif", "video/mp4", "video/quicktime", "video/x-m4v"],
+        "imageSizeLimit": 5242880,
+        "gifSizeLimit": 15728640,
+        "videoSizeLimit": 536870912
     },
     "bluesky": {
         "use": false,
         "handle": "handle.bsky.social",
         "appPassword": "",
         "refreshIntervalMs": 1800000,
-        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/avif", "image/bmp"]
+        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/avif", "image/bmp"],
+        "globalSizeLimit": 976560
     },
     "threads": {
         "use": false,
@@ -32,7 +36,10 @@
         "consumerSecret": "",
         "blog": "bloghandle",
         "refreshIntervalMs": 1800000,
-        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/gif", "video/mp4", "video/quicktime", "audio/mpeg"]
+        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/gif", "video/mp4", "video/quicktime", "audio/mpeg"],
+        "imageSizeLimit": 20971520,
+        "gifSizeLimit": 10485760,
+        "videoSizeLimit": 536870912
     },
     "mastodon": {
         "use": false,
@@ -75,15 +82,16 @@
         "email": "bla@email.com",
         "password": "",
         "handle": "handle",
-        "mimeTypes": ["image/png", "image/jpeg", "image/gif","image/webp", "image/svg+xml", "audio/aac", "audio/mp4", "audio/x-m4a", "audio/flac", "audio/x-flac", "audio/mpeg", "audio/wav"]
+        "mimeTypes": ["image/png", "image/jpeg", "image/gif","image/webp", "image/svg+xml", "audio/aac", "audio/mp4", "audio/x-m4a", "audio/flac", "audio/x-flac", "audio/mpeg", "audio/wav"],
+        "globalSizeLimit": 5242880
     },
     "firefish": {
         "use": false,
         "instance": "firefish.instance",
         "token": ""
     },
-    "userAgent": "shycatbot (https://github.com/whakama/shycatbot-open)",
-    "scrapingUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/120.0",
+    "userAgent": "shycatbot (https://github.com/shy1132/shycatbot-open)",
+    "scrapingUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
     "syncPosts": false,
     "priorityList": ["twitter", "tumblr", "bluesky", "mastodon", "firefish", "cohost", "threads", "instagram"],
     "directory": "/path/to/pictures",

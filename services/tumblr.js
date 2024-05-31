@@ -1,6 +1,7 @@
 //requires
 const fs = require('fs').promises
 const crypto = require('crypto')
+const FormData = require('form-data')
 const config = require('../config.json')
 
 //code
@@ -103,38 +104,35 @@ async function post(fileName, filePath, mimeType) {
             ]
         }
 
-        //construct the multipart form data (fuck tumblrs api, what the fuck dude)
+        //construct the multipart form data
+        let form = new FormData()
+
         let boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
+        form.setBoundary(boundary)
 
-        let jsonBound = `--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="json"\r\n` +
-        `Content-Type: application/json\r\n\r\n`
-
-        let fileBound = `--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="media"; filename="${fileName.replaceAll('"', '\\"')}"\r\n` +
-        `Content-Type: ${mimeType}\r\n\r\n`
-
-        let endBoundary = `\r\n--${boundary}--\r\n`;
-
-        let bodyBuffer = Buffer.concat([ Buffer.from(jsonBound), Buffer.from(JSON.stringify(postJson) + '\r\n'), Buffer.from(fileBound), file, Buffer.from(endBoundary) ])
+        form.append('json', JSON.stringify(postJson)) //hate that tumblr does this, i originally spent a good like 2 hours trying to figure this out because their api docs are SO FUCKING VAGUE
+        form.append('media', file, {
+            filename: fileName,
+            contentType: mimeType
+        })
 
         //create the post, with the form data
         let data = await (await fetch(`https://api.tumblr.com/v2/blog/${blog}/posts`, {
             headers: {
                 'Authorization': accessToken,
-                'Content-Type': `multipart/form-data; boundary=${boundary}`,
-                'User-Agent': config.userAgent
+                'User-Agent': config.userAgent,
+                ...form.getHeaders()
             },
             method: 'POST',
-            body: bodyBuffer
+            body: form.getBuffer()
         })).json()
 
         if (!data.meta || data.meta.status != 201) throw `post:${JSON.stringify(data)}`;
 
         done()
     } catch (err) {
-        console.log(`tumblr: failed to post ${fileName}`)
-        console.error(err)
+        console.log(`tumblr: failed to post ${fileName}`, err)
+        console.error('tumblr error: ', err)
         done()
     }
 }

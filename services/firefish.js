@@ -1,6 +1,7 @@
 //requires
 const fs = require('fs').promises
 const crypto = require('crypto')
+const FormData = require('form-data')
 const config = require('../config.json')
 
 //code
@@ -36,34 +37,27 @@ async function post(fileName, filePath, mimeType) {
         let file = await fs.readFile(filePath)
 
         //construct the multipart form data
+        let form = new FormData()
+
         let boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
-        let body = ''
+        form.setBoundary(boundary)
 
-        body += `--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="force"\r\n\r\n` +
-        `true`
-
-        body += `\r\n--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="name"\r\n\r\n` +
-        `${fileName.replaceAll('"', '\\"')}`
-
-        body += `\r\n--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="file"; filename="${fileName.replaceAll('"', '\\"')}"\r\n` +
-        `Content-Type: ${mimeType}\r\n\r\n`
-
-        let endBoundary = `\r\n--${boundary}--\r\n`;
-
-        let bodyBuffer = Buffer.concat([ Buffer.from(body), file, Buffer.from(endBoundary) ])
+        form.append('force', 'true')
+        form.append('name', fileName)
+        form.append('file', file, {
+            filename: fileName,
+            contentType: mimeType
+        })
 
         //upload it to the user's drive
         let uploadData = await (await fetch(`${baseUrl}/api/drive/files/create`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Content-Type': `multipart/form-data; boundary=${boundary}`,
                 'User-Agent': config.userAgent,
+                ...form.getHeaders()
             },
             method: 'POST',
-            body: bodyBuffer
+            body: form.getBuffer()
         })).json()
 
         if (!uploadData.id) throw `upload:${JSON.stringify(uploadData)}`;
@@ -84,8 +78,8 @@ async function post(fileName, filePath, mimeType) {
 
         done()
     } catch (err) {
-        console.log(`firefish: failed to post ${fileName}`)
-        console.error(err)
+        console.log(`firefish: failed to post ${fileName}`, err)
+        console.error('firefish error: ', err)
         done()
     }
 }

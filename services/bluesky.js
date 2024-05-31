@@ -101,7 +101,22 @@ async function post(fileName, filePath, mimeType) {
         if (!upload.blob) throw `upload:${JSON.stringify(upload)}`;
 
         //create the post with the media
-        let postBody = JSON.stringify({ collection: 'app.bsky.feed.post', repo: config.bluesky.handle, record: { $type: 'app.bsky.feed.post', createdAt: new Date().toISOString(), text: fileName, embed: { $type: 'app.bsky.embed.images', images: [ { alt: '', image: upload.blob }]}}})
+        let postBody = JSON.stringify({
+            collection: 'app.bsky.feed.post',
+            repo: config.bluesky.handle,
+            record: {
+                $type: 'app.bsky.feed.post',
+                createdAt: new Date().toISOString(),
+                text: fileName,
+                embed: {
+                    $type: 'app.bsky.embed.images',
+                    images: [
+                        { alt: '', image: upload.blob }
+                    ]
+                }
+            }
+        })
+
         let post = await (await fetch('https://bsky.social/xrpc/com.atproto.repo.createRecord', {
             headers: {
                 'Authorization': `Bearer ${session.accessJwt}`,
@@ -116,8 +131,8 @@ async function post(fileName, filePath, mimeType) {
 
         done()
     } catch (err) {
-        console.log(`bluesky: failed to post ${fileName}`)
-        console.error(err)
+        console.log(`bluesky: failed to post ${fileName}`, err)
+        console.error('bluesky error: ', err)
         done()
     }
 }

@@ -10,18 +10,18 @@ the code for [shycatbot](https://shy.rocks/shycatbot) (**does not include cats!!
 4. run `node .` to start the bot
 
 ## config documentation
-`syncPosts` determines whether or not to sync posts between all of the accounts being used (since not all platforms support the same file types)
 
-if `syncPosts` is true, it will narrow it down to only file types ALL of the platforms support, which limits posting potential
+### `syncPosts`
+`syncPosts` determines whether or not to sync posts between all of the accounts being used (since not all platforms support the same file types)\
+`true`: narrow it down to only file types ALL of the platforms support, which limits posting potential\
+`false`: post the same thing on every platform, but if a platform doesnt support the chosen file, will choose a new one specifically for that platform
 
-if `syncPosts` is false, it will post the same thing on every platform, but if a platform doesnt support the chosen file, it will choose a new one specifically for that platform
+### `priorityList`
+`priorityList` is the list of platforms in whatever order you want to login + post to (since it doesnt all happen at the exact same time)\
+it is (by default) ordered by the speed of the platforms, but you can change it to whatever you're prioritizing\
+it doesn't have to include ALL of the platforms, just the ones that you're using (even then, if you don't include one, it will just push that one to the back)
 
-`priorityList` is the list of platforms in whatever order you want to login + post to (since it doesnt all happen at the exact same time)
-
-`priorityList` is (by default) ordered by the speed of the platforms, but you can change it to whatever you're prioritizing
-
-`priorityList` doesn't have to include ALL of the platforms, just the ones that you're using (even then, if you don't include one, it will just push that one to the back)
-
+### etc
 for any of the social media keys, set `use` to true to post to that platform
 
 for the `twitter` key, you need to sign up for the twitter api and provide the needed credentials
@@ -41,8 +41,5 @@ for the `cohost` key, you simply need to provide the `email` and `password`, and
 for the `firefish` key, you need to provide the `instance` you want to post to, and a token from the `API` category in settings, which needs to have the permissions `View your account information`, `Access your Drive files and folders`, `Edit or delete your Drive files and folders`, and `Compose or delete posts`. it is recommended that you choose an instance with a lot of drive storage
 
 ## notice
-this is probably not the most convenient thing to run for an image poster, this was made specifically for shycatbot
-but have at it, it runs 24/7 on my server quite reliably
-
-(and sorry for the sheer amount of platforms, i port shycatbot to things for fun)
-(AND ALSO if you decide to make a media posting bot with shycatbot's source code, link the repo somewhere!!!)
+this is likely not the most stable code ever, but it runs 24/7 on my server quite reliably\
+(if you decide to make a media posting bot with shycatbot's source code, link the repo somewhere!!!)

@@ -2,6 +2,7 @@
 const fs = require('fs').promises
 const crypto = require('crypto')
 const util = require('util')
+const FormData = require('form-data')
 const config = require('../config.json')
 
 //code
@@ -16,7 +17,11 @@ let done = function() {};
 let cookie;
 
 async function init() {
-    let jsonBody = { '0': { email: config.cohost.email }}
+    let jsonBody = {
+        '0': {
+            email: config.cohost.email
+        }
+    }
 
     //get the salt from the server
     let saltData = await (await fetch(`https://cohost.org/api/v1/trpc/login.getSalt?batch=1&input=${encodeURIComponent(JSON.stringify(jsonBody))}`, {
@@ -133,32 +138,29 @@ async function post(fileName, filePath, mimeType) {
         let attachmentId = attachment.attachmentId
 
         //construct the multipart form data
+        let form = new FormData()
+
         let boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
-        let dataBound = ''
+        form.setBoundary(boundary)
 
         for (let key of Object.keys(attachment.requiredFields)) {
-            let value = attachment.requiredFields[key].replaceAll('"', '\\"')
-            dataBound += `--${boundary}\r\n` +
-            `Content-Disposition: form-data; name="${key}"\r\n\r\n` +
-            `${value}\r\n`
+            let value = attachment.requiredFields[key]
+            form.append(key, value)
         }
 
-        let fileBound = `--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="file"; filename="${fileName.replaceAll('"', '\\"')}"\r\n` +
-        `Content-Type: ${mimeType}\r\n\r\n`
-
-        let endBoundary = `\r\n--${boundary}--\r\n`;
-
-        let bodyBuffer = Buffer.concat([ Buffer.from(dataBound), Buffer.from(fileBound), file, Buffer.from(endBoundary) ])
+        form.append('file', file, {
+            filename: fileName,
+            contentType: mimeType
+        })
 
         //upload the multipart form data (including the file) to the cohost cdn
         let upload = await fetch('https://staging.cohostcdn.org/redcent-dev', {
             headers: {
-                'Content-Type': `multipart/form-data; boundary=${boundary}`,
-                'User-Agent': config.userAgent
+                'User-Agent': config.userAgent,
+                ...form.getHeaders()
             },
             method: 'POST',
-            body: bodyBuffer
+            body: form.getBuffer()
         })
 
         if (upload.status != 204) {
@@ -206,8 +208,8 @@ async function post(fileName, filePath, mimeType) {
 
         done()
     } catch (err) {
-        console.log(`cohost: failed to post ${fileName}`)
-        console.error(err)
+        console.log(`cohost: failed to post ${fileName}`, err)
+        console.error('cohost error: ', err)
         done()
     }
 }

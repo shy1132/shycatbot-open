@@ -37,8 +37,8 @@ async function post(fileName, filePath) {
         await client.v2.tweet(fileName, { media: { media_ids: [ media ] } })
         done()
     } catch (err) {
-        console.log(`twitter: failed to post ${fileName}`)
-        console.error(err)
+        console.log(`twitter: failed to post ${fileName}`, err)
+        console.error('twitter error: ', err)
         done()
     }
 }

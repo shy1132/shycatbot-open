@@ -209,8 +209,8 @@ async function post(fileName, filePath, mimeType) {
 
         done()
     } catch (err) {
-        console.log(`threads: failed to post ${fileName}`)
-        console.error(err)
+        console.log(`threads: failed to post ${fileName}`, err)
+        console.error('threads error: ', err)
         done()
     }
 }

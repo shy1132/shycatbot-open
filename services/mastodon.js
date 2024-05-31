@@ -1,6 +1,7 @@
 //requires
 const fs = require('fs').promises
 const crypto = require('crypto')
+const FormData = require('form-data')
 const config = require('../config.json')
 
 //code
@@ -35,25 +36,25 @@ async function post(fileName, filePath, mimeType) {
         let file = await fs.readFile(filePath)
 
         //construct the multipart form data
+        let form = new FormData()
+
         let boundary = `shycatbotFormBoundary${crypto.randomBytes(8).toString('hex')}`
+        form.setBoundary(boundary)
 
-        let body = `--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="file"; filename="${fileName.replaceAll('"', '\\"')}"\r\n` +
-        `Content-Type: ${mimeType}\r\n\r\n`
-
-        let endBoundary = `\r\n--${boundary}--\r\n`;
-
-        let bodyBuffer = Buffer.concat([ Buffer.from(body), file, Buffer.from(endBoundary) ])
+        form.append('file', file, {
+            filename: fileName,
+            contentType: mimeType
+        })
 
         //upload it to the instance's api
         let uploadData = await (await fetch(`${baseUrl}/api/v2/media`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': `multipart/form-data; boundary=${boundary}`,
                 'User-Agent': config.userAgent,
+                ...form.getHeaders()
             },
             method: 'POST',
-            body: bodyBuffer
+            body: form.getBuffer()
         })).json()
 
         if (!uploadData.id) throw `upload:${JSON.stringify(uploadData)}`;
@@ -104,8 +105,8 @@ async function post(fileName, filePath, mimeType) {
 
         done()
     } catch (err) {
-        console.log(`mastodon: failed to post ${fileName}`)
-        console.error(err)
+        console.log(`mastodon: failed to post ${fileName}`, err)
+        console.error('mastodon error: ', err)
         done()
     }
 }

@@ -42,6 +42,7 @@ platformKeys = platformKeys.sort((a, b) => {
 
 let usedPlatforms = [];
 let doneCount = 0;
+let waitingPlatforms = 0;
 
 function logSegment() {
     return console.log('-'.repeat(64));
@@ -50,16 +51,17 @@ function logSegment() {
 async function initialize() {
     console.log('initializing')
 
+    let configs = platformKeys.map((platform) => config[platform])
+    let allMimeTypes = configs.filter(config => config.use && config.mimeTypes).map(config => config.mimeTypes)[0]
+
     if (config.syncPosts) {
         console.log('sync posts is on; compatible media types are limited to only ones all used platforms support, which removes a lot of potential for posts')
 
-        let configs = platformKeys.map((platform) => config[platform])
-        let allMimeTypes = configs.filter(config => config.use && config.mimeTypes).map(config => config.mimeTypes)
-        let commonMimeTypes = allMimeTypes[0].filter((value) => allMimeTypes.every((array) => array.includes(value)))
-
+        let commonMimeTypes = allMimeTypes.filter((value) => allMimeTypes.every((array) => array.includes(value)))
         config.mimeTypes = commonMimeTypes;
     } else {
         console.log('sync posts is off; if the bot tries to post media that isn\'t supported on a platform, it will choose a different file for that platform')
+        config.mimeTypes = allMimeTypes;
     }
 
     for (let platform of platformKeys) {
@@ -80,7 +82,7 @@ async function initialize() {
         }
     }
 
-    if (usedPlatforms.length < 1) return console.log('u have no platforms enabled or they all failed')
+    if (usedPlatforms.length < 1) return console.log('u have no platforms enabled or they all failed');
 
     logSegment()
 
@@ -89,7 +91,9 @@ async function initialize() {
 }
 
 async function postRandomFile() {
-    let file = await getRandomFile(config.syncPosts ? config.mimeTypes : null);
+    let file = await getRandomFile(config.mimeTypes);
+    if (file.error) return console.log(`error ${file.error}, waiting until next interval`);
+
     console.log(`posting ${file.fileName}`)
 
     for (let platform of platformKeys) { //a bit hard to read but its dynamic so i wont really ever have to change this
@@ -97,18 +101,34 @@ async function postRandomFile() {
         if (platformConfig.use) platformConfig.use = platforms[platform].isEnabled();
         if (!platformConfig.use) continue;
 
-        if (platformConfig.mimeTypes && !platformConfig.mimeTypes.includes(file.mimeType) && !config.syncPosts) {
-            console.log(`${platform}: ${file.mimeType} unsuitable, picking different file for ${platform}`)
+        let isAboveSizeLimit = false;
+        if (
+            (platformConfig.globalSizeLimit && file.size > platformConfig.globalSizeLimit) ||
+            (file.mimeType.startsWith('image/') && platformConfig.imageSizeLimit && file.size > platformConfig.imageSizeLimit) ||
+            (file.mimeType == 'image/gif' && platformConfig.gifSizeLimit && file.size > platformConfig.gifSizeLimit) ||
+            (file.mimeType.startsWith('video/') && platformConfig.videoSizeLimit && file.size > platformConfig.videoSizeLimit)
+        ) { 
+            isAboveSizeLimit = true;
+        }
 
-            let differentFile = await getRandomFile(platformConfig.mimeTypes);
+        if (((platformConfig.mimeTypes && !platformConfig.mimeTypes.includes(file.mimeType)) || isAboveSizeLimit) && !config.syncPosts) {
+            console.log(`${platform}: ${file.fileName} (${file.mimeType}, ${file.size} bytes) unsuitable, picking different file for ${platform}`)
+
+            let differentFile = await getRandomFile(platformConfig.mimeTypes, platformConfig.sizeLimit);
+            if (file.error && file.error == 'no_files') {
+                console.log(`${platform}: no files match the platform's mimetypes, disabling this platform`);
+                config[platform].use = false;
+                continue;
+            }
+
             console.log(`${platform}: posting ${differentFile.fileName}`)
-
             platforms[platform].post(differentFile.fileName, differentFile.filePath, differentFile.mimeType)
         } else {
             console.log(`${platform}: posting ${file.fileName}`)
             platforms[platform].post(file.fileName, file.filePath, file.mimeType)
         }
 
+        waitingPlatforms++
         platforms[platform].onDone(() => doneCount += 1)
     }
 
@@ -116,28 +136,38 @@ async function postRandomFile() {
     logSegment()
 }
 
-async function getRandomFile(mimeTypes) {
-    let files = await fs.readdir(config.directory)
-    if (mimeTypes) files = files.filter(name => mimeTypes.includes(mime.lookup(name))) //remove all mime types that arent in mimeTypes (if mimeTypes is supplied)
-    if (files.length < 1) {
-        console.log(`no files fitting these mime types could be found: ${mimeTypes.join(', ')}`)
-        return { error: true };
-    }
+async function getRandomFile(mimeTypes, sizeLimit) {
+    let file;
+    do { //its Technically possible that this could just cause an infinite loop until the heat death of the universe, but Walter Summerford isn't the one using this bot so i'm not too concerned
+        let files = await fs.readdir(config.directory)
+        if (mimeTypes) files = files.filter(name => mimeTypes.includes(mime.lookup(name))) //remove all mime types that arent in mimeTypes (if mimeTypes is supplied)
+        if (files.length < 1) {
+            console.log(`no files fitting these mime types could be found: ${mimeTypes.join(', ')}`)
+            return { error: 'no_files' }; //Do Not run until the heat death of the universe
+        }
 
-    let fileName = files[Math.floor(Math.random() * files.length)]
-    let filePath = path.join(config.directory, fileName)
-    let fileExtension = path.parse(fileName).ext?.toLowerCase()
-    if (!fileExtension) return getRandomFile(mimeTypes);
+        let fileName = files[Math.floor(Math.random() * files.length)]
+        let filePath = path.join(config.directory, fileName)
+        let fileExtension = path.parse(fileName).ext?.toLowerCase()
+        if (!fileExtension) continue;
 
-    let mimeType = mime.lookup(fileExtension)
+        let fileStat = await fs.stat(filePath)
+        let size = fileStat.size;
+        if (sizeLimit && size > sizeLimit) continue;
 
-    return { fileName, filePath, mimeType };
+        let mimeType = mime.lookup(fileExtension)
+        if (!mimeType) continue;
+
+        file = { fileName, filePath, mimeType, size }
+    } while (!file)
+
+    return file;
 }
 
 function waitUntilDone() {
     return new Promise(resolve => {
         function checkIfDone() {
-            if (doneCount === usedPlatforms.length) {
+            if (doneCount >= waitingPlatforms) {
                 resolve()
                 doneCount = 0;
             } else {
@@ -146,7 +176,7 @@ function waitUntilDone() {
         }
 
         checkIfDone()
-    })
+    });
 }
 
 initialize()
