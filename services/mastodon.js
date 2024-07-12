@@ -9,8 +9,6 @@ if (!config.mastodon.use) return;
 if (config.mastodon.use && !config.mastodon.instance) return console.log('missing mastodon instance');
 if (config.mastodon.use && !config.mastodon.accessToken) return console.log('missing mastodon client key');
 
-let done = function() {};
-
 let accessToken = config.mastodon.accessToken;
 let baseUrl = `https://${config.mastodon.instance}`
 
@@ -103,19 +101,16 @@ async function post(fileName, filePath, mimeType) {
 
         if (!statusData.id) throw `post:${JSON.stringify(statusData)}`;
 
-        done()
+        return true;
     } catch (err) {
         console.log(`mastodon: failed to post ${fileName}`, err)
         console.error('mastodon error: ', err)
-        done()
+        return false;
     }
 }
 
 module.exports.init = init;
 module.exports.post = post;
-module.exports.onDone = function(callback) {
-    done = callback;
-}
 module.exports.isEnabled = function() {
     return config.mastodon.use;
 }

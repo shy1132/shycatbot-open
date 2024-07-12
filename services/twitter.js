@@ -6,8 +6,6 @@ const config = require('../config.json')
 if (!config.twitter.use) return;
 if (config.twitter.use && !config.twitter.appKey) return console.log('missing twitter keys');
 
-let done = function() {};
-
 let client;
 
 async function init() {
@@ -35,19 +33,16 @@ async function post(fileName, filePath) {
     try {
         let media = await client.v1.uploadMedia(filePath)
         await client.v2.tweet(fileName, { media: { media_ids: [ media ] } })
-        done()
+        return true;
     } catch (err) {
         console.log(`twitter: failed to post ${fileName}`, err)
         console.error('twitter error: ', err)
-        done()
+        return false;
     }
 }
 
 module.exports.init = init;
 module.exports.post = post;
-module.exports.onDone = function(callback) {
-    done = callback;
-}
 module.exports.isEnabled = function() {
     return config.twitter.use;
 }

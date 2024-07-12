@@ -9,8 +9,6 @@ if (!config.tumblr.use) return;
 if (config.tumblr.use && !config.tumblr.blog) return console.log('missing tumblr blog');
 if (config.tumblr.use && !config.tumblr.consumerKey) return console.log('missing tumblr consumer key');
 
-let done = function() {};
-
 let consumerKey = config.tumblr.consumerKey
 let consumerSecret = config.tumblr.consumerSecret
 let accessToken;
@@ -129,19 +127,16 @@ async function post(fileName, filePath, mimeType) {
 
         if (!data.meta || data.meta.status != 201) throw `post:${JSON.stringify(data)}`;
 
-        done()
+        return true;
     } catch (err) {
         console.log(`tumblr: failed to post ${fileName}`, err)
         console.error('tumblr error: ', err)
-        done()
+        return false;
     }
 }
 
 module.exports.init = init;
 module.exports.post = post;
-module.exports.onDone = function(callback) {
-    done = callback;
-}
 module.exports.isEnabled = function() {
     return config.tumblr.use;
 }

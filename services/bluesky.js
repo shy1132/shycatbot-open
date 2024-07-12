@@ -8,8 +8,6 @@ if (config.bluesky.use && !config.bluesky.appPassword) return console.log('missi
 if (config.bluesky.use && !config.bluesky.handle) return console.log('missing bluesky handle');
 if (config.bluesky.handle.startsWith('@')) config.bluesky.handle = config.bluesky.handle.substr(1);
 
-let done = function() {};
-
 let session = {
     accessJwt: null,
     refreshJwt: null,
@@ -129,19 +127,16 @@ async function post(fileName, filePath, mimeType) {
 
         if (!post.uri) throw `post:${JSON.stringify(post)}`;
 
-        done()
+        return true;
     } catch (err) {
         console.log(`bluesky: failed to post ${fileName}`, err)
         console.error('bluesky error: ', err)
-        done()
+        return false;
     }
 }
 
 module.exports.init = init;
 module.exports.post = post;
-module.exports.onDone = function(callback) {
-    done = callback;
-}
 module.exports.isEnabled = function() {
     return config.bluesky.use;
 }

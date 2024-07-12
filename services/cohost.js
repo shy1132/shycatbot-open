@@ -12,7 +12,6 @@ if (config.cohost.use && !config.cohost.email) return console.log('missing cohos
 if (config.cohost.handle.startsWith('@')) config.cohost.handle = config.cohost.handle.substr(1);
 
 const pbkdf2 = util.promisify(crypto.pbkdf2)
-let done = function() {};
 
 let cookie;
 
@@ -206,19 +205,16 @@ async function post(fileName, filePath, mimeType) {
             throw `postUpdate:${JSON.stringify(postUpdateData)}`;
         }
 
-        done()
+        return true;
     } catch (err) {
         console.log(`cohost: failed to post ${fileName}`, err)
         console.error('cohost error: ', err)
-        done()
+        return false;
     }
 }
 
 module.exports.init = init;
 module.exports.post = post;
-module.exports.onDone = function(callback) {
-    done = callback;
-}
 module.exports.isEnabled = function() {
     return config.cohost.use;
 }

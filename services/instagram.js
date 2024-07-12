@@ -10,8 +10,6 @@ if (!config.instagram.use) return;
 if (config.instagram.use && !config.instagram.password) return console.log('missing instagram password');
 if (config.instagram.use && !config.instagram.email) return console.log('missing instagram email');
 
-let done = function() {};
-
 let data = {
     appId: '936619743392459',
     csrfToken: '',
@@ -211,19 +209,16 @@ async function post(fileName, filePath, mimeType) {
         let setCookie = postRes.headers.getSetCookie().map(cookie => cookie.split(';')[0]).join('; ')
         if (setCookie.includes('csrftoken=')) data.csrfToken = setCookie.split('csrftoken=')[1].split(';')[0]
 
-        done()
+        return true;
     } catch (err) {
         console.log(`instagram: failed to post ${fileName}`, err)
         console.error('instagram error: ', err)
-        done()
+        return false;
     }
 }
 
 module.exports.init = init;
 module.exports.post = post;
-module.exports.onDone = function(callback) {
-    done = callback;
-}
 module.exports.isEnabled = function() {
     return config.instagram.use;
 }

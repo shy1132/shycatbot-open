@@ -9,8 +9,6 @@ if (!config.firefish.use) return;
 if (config.firefish.use && !config.firefish.instance) return console.log('missing firefish instance');
 if (config.firefish.use && !config.firefish.token) return console.log('missing firefish token');
 
-let done = function() {};
-
 let token = config.firefish.token;
 let baseUrl = `https://${config.firefish.instance}`
 
@@ -76,19 +74,16 @@ async function post(fileName, filePath, mimeType) {
 
         if (!noteData.createdNote) throw `post:${JSON.stringify(noteData)}`;
 
-        done()
+        return true;
     } catch (err) {
         console.log(`firefish: failed to post ${fileName}`, err)
         console.error('firefish error: ', err)
-        done()
+        return false;
     }
 }
 
 module.exports.init = init;
 module.exports.post = post;
-module.exports.onDone = function(callback) {
-    done = callback;
-}
 module.exports.isEnabled = function() {
     return config.firefish.use;
 }

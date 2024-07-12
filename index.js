@@ -41,8 +41,6 @@ platformKeys = platformKeys.sort((a, b) => {
 })
 
 let usedPlatforms = [];
-let doneCount = 0;
-let waitingPlatforms = 0;
 
 function logSegment() {
     return console.log('-'.repeat(64));
@@ -96,6 +94,8 @@ async function postRandomFile() {
 
     console.log(`posting ${file.fileName}`)
 
+    let promises = []
+
     for (let platform of platformKeys) { //a bit hard to read but its dynamic so i wont really ever have to change this
         let platformConfig = config[platform]
         if (platformConfig.use) platformConfig.use = platforms[platform].isEnabled();
@@ -122,17 +122,18 @@ async function postRandomFile() {
             }
 
             console.log(`${platform}: posting ${differentFile.fileName}`)
-            platforms[platform].post(differentFile.fileName, differentFile.filePath, differentFile.mimeType)
+
+            let promise = platforms[platform].post(differentFile.fileName, differentFile.filePath, differentFile.mimeType)
+            promises.push(promise)
         } else {
             console.log(`${platform}: posting ${file.fileName}`)
-            platforms[platform].post(file.fileName, file.filePath, file.mimeType)
-        }
 
-        waitingPlatforms++
-        platforms[platform].onDone(() => doneCount += 1)
+            let promise = platforms[platform].post(file.fileName, file.filePath, file.mimeType)
+            promises.push(promise)
+        }
     }
 
-    await waitUntilDone();
+    await Promise.all(promises)
     logSegment()
 }
 
@@ -162,21 +163,6 @@ async function getRandomFile(mimeTypes, sizeLimit) {
     } while (!file)
 
     return file;
-}
-
-function waitUntilDone() {
-    return new Promise(resolve => {
-        function checkIfDone() {
-            if (doneCount >= waitingPlatforms) {
-                resolve()
-                doneCount = 0;
-            } else {
-                setTimeout(checkIfDone, 10)
-            }
-        }
-
-        checkIfDone()
-    });
 }
 
 initialize()

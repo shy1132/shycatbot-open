@@ -10,8 +10,6 @@ if (!config.threads.use) return;
 if (config.threads.use && !config.threads.password) return console.log('missing threads password');
 if (config.threads.use && !config.threads.email) return console.log('missing threads email');
 
-let done = function() {};
-
 let data = {
     appId: '238260118697367',
     csrfToken: '',
@@ -207,19 +205,16 @@ async function post(fileName, filePath, mimeType) {
         let setCookie = postRes.headers.getSetCookie().map(cookie => cookie.split(';')[0]).join('; ')
         if (setCookie.includes('csrftoken=')) data.csrfToken = setCookie.split('csrftoken=')[1].split(';')[0]
 
-        done()
+        return true;
     } catch (err) {
         console.log(`threads: failed to post ${fileName}`, err)
         console.error('threads error: ', err)
-        done()
+        return false;
     }
 }
 
 module.exports.init = init;
 module.exports.post = post;
-module.exports.onDone = function(callback) {
-    done = callback;
-}
 module.exports.isEnabled = function() {
     return config.threads.use;
 }
