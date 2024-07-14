@@ -42,4 +42,4 @@ for the `firefish` key, you need to provide the `instance` you want to post to, 
 
 ## notice
 this is likely not the most stable code ever, but it runs 24/7 on my server quite reliably\
-(if you decide to make a media posting bot with shycatbot's source code, link the repo somewhere!!!)
+(feel free to host your own media bot with this code!)
