@@ -15,7 +15,6 @@ let platforms = {
     instagram: require('./services/instagram.js'),
     tumblr: require('./services/tumblr.js'),
     mastodon: require('./services/mastodon.js'),
-    cohost: require('./services/cohost.js'),
     firefish: require('./services/firefish.js')
 }
 

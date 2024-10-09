@@ -77,14 +77,6 @@
             "audio/opus"
         ]
     },
-    "cohost": {
-        "use": false,
-        "email": "bla@email.com",
-        "password": "",
-        "handle": "handle",
-        "mimeTypes": ["image/png", "image/jpeg", "image/gif","image/webp", "image/svg+xml", "audio/aac", "audio/mp4", "audio/x-m4a", "audio/flac", "audio/x-flac", "audio/mpeg", "audio/wav"],
-        "globalSizeLimit": 5242880
-    },
     "firefish": {
         "use": false,
         "instance": "firefish.instance",
@@ -93,7 +85,7 @@
     "userAgent": "shycatbot (https://github.com/shy1132/shycatbot-open)",
     "scrapingUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
     "syncPosts": false,
-    "priorityList": ["twitter", "tumblr", "bluesky", "mastodon", "firefish", "cohost", "threads", "instagram"],
+    "priorityList": ["twitter", "tumblr", "bluesky", "mastodon", "firefish", "threads", "instagram"],
     "directory": "/path/to/pictures",
     "postIntervalMs": 3600000
 }
