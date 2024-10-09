@@ -36,8 +36,6 @@ for the `tumblr` key, you need to provide the `blog` you want to post to, and cr
 
 for the `mastodon` key, you need to provide the `instance` you want to post to, and an access token from the setting category where you can create an app
 
-for the `cohost` key, you simply need to provide the `email` and `password`, and the `handle` you want to post to
-
 for the `firefish` key, you need to provide the `instance` you want to post to, and a token from the `API` category in settings, which needs to have the permissions `View your account information`, `Access your Drive files and folders`, `Edit or delete your Drive files and folders`, and `Compose or delete posts`. it is recommended that you choose an instance with a lot of drive storage
 
 ## notice
