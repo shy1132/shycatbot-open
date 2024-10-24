@@ -67,7 +67,7 @@ async function post(fileName, filePath, mimeType) {
                         let data = await (await fetch(`${baseUrl}/api/v1/media/${uploadData.id}`, {
                             headers: {
                                 'Authorization': `Bearer ${accessToken}`,
-                                'User-Agent': config.userAgent,
+                                'User-Agent': config.userAgent
                             }
                         })).json()
             

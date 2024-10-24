@@ -15,8 +15,9 @@
         "handle": "handle.bsky.social",
         "appPassword": "",
         "refreshIntervalMs": 1800000,
-        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/avif", "image/bmp"],
-        "globalSizeLimit": 976560
+        "mimeTypes": ["image/png", "image/jpeg", "image/webp", "image/avif", "image/bmp", "video/mp4", "video/quicktime", "video/x-m4v"],
+        "imageSizeLimit": 976560,
+        "gifSizeLimit": 976560
     },
     "threads": {
         "use": false,
@@ -85,7 +86,7 @@
     "userAgent": "shycatbot (https://github.com/shy1132/shycatbot-open)",
     "scrapingUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
     "syncPosts": false,
-    "priorityList": ["twitter", "tumblr", "bluesky", "mastodon", "firefish", "threads", "instagram"],
+    "priorityList": ["twitter", "bluesky", "mastodon", "tumblr", "threads", "instagram", "firefish"],
     "directory": "/path/to/pictures",
     "postIntervalMs": 3600000
 }
