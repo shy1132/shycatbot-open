@@ -72,9 +72,9 @@ async function post(fileName, filePath, mimeType) {
                         })).json()
             
                         if (data.url) {
-                            return resolve(true);
+                            resolve(true)
                         } else if (!data.id) { //will always have this
-                            throw `uploadProgress:${JSON.stringify(data)}`;
+                            reject(`uploadProgress:${JSON.stringify(data)}`);
                         } else if (!data.url) {
                             setTimeout(async () => await check(), 1000)
                         }

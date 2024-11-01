@@ -169,9 +169,9 @@ async function post(fileName, filePath, mimeType) {
                             })).json()
 
                             if (!data.jobStatus || data.jobStatus.state == 'JOB_STATE_FAILED') {
-                                throw `uploadProgress:${JSON.stringify(data)}`;
+                                reject(`uploadProgress:${JSON.stringify(data)}`)
                             } else if (data.jobStatus.state == 'JOB_STATE_COMPLETED') {
-                                return resolve(data.jobStatus.blob);
+                                resolve(data.jobStatus.blob)
                             } else {
                                 setTimeout(async () => await check(), 1000)
                             }

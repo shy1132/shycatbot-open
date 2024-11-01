@@ -9,7 +9,7 @@ const config = require('./config.json')
 
 //code
 let platforms = {
-    twitter: require('./services/twitter.js'),
+    twitter: require('./services/twitter-user.js'),
     bluesky: require('./services/bluesky.js'),
     threads: require('./services/threads.js'),
     instagram: require('./services/instagram.js'),
@@ -17,6 +17,8 @@ let platforms = {
     mastodon: require('./services/mastodon.js'),
     firefish: require('./services/firefish.js')
 }
+
+if (config.twitter.userAuth) platforms.twitter = require('./services/twitter-user.js')
 
 let platformKeys = Object.keys(platforms);
 platformKeys = platformKeys.reverse()

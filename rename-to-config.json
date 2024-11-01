@@ -1,6 +1,9 @@
 {
     "twitter": {
         "use": false,
+        "userAuth": false,
+        "username": "",
+        "password": "",
         "appKey": "",
         "appSecret": "",
         "accessToken": "",
